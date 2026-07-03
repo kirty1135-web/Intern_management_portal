@@ -29,7 +29,6 @@ body {
     position: relative;
 }
 
-/* Animated Background Shapes */
 .background {
     position: absolute;
     width: 100%;
@@ -68,16 +67,15 @@ body {
     100% { transform: translate(50px, 50px) rotate(20deg); }
 }
 
-/* Glassmorphism Container */
 .container {
     background: var(--glass-bg);
     border-radius: 20px;
     box-shadow: var(--shadow);
     position: relative;
     overflow: hidden;
-    width: 850px; /* Reduced width for better proportion */
+    width: 850px;
     max-width: 100%;
-    min-height: 550px; /* Reduced height */
+    min-height: 550px;
     z-index: 10;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -99,7 +97,7 @@ body {
 
 .container.right-panel-active .sign-in-container {
     transform: translateX(100%);
-    opacity: 0; /* Fade out effect */
+    opacity: 0;
 }
 
 .sign-up-container {
@@ -192,9 +190,8 @@ body {
     transform: translateX(20%);
 }
 
-/* Form Styling */
 form {
-    background-color: transparent; /* Transparent for glass effect */
+    background-color: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -267,8 +264,6 @@ button.ghost:hover {
     background-color: rgba(255,255,255,0.1);
 }
 
-
-/* Input Styling */
 .input-group {
     position: relative;
     width: 100%;
@@ -295,7 +290,6 @@ input:focus {
     background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Social Icons */
 .social-container {
     margin: 20px 0;
 }
@@ -319,4 +313,58 @@ input:focus {
     border-color: var(--primary-color);
     color: white;
     transform: translateY(-3px);
+}
+
+
+.input-group {
+    margin-bottom: 4px; 
+}
+
+.error-message {
+    display: block;
+    min-height: 16px;
+    font-size: 11px;
+    color: #ff6b6b;
+    text-align: left;
+    margin: 4px 2px 0;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.error-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.input-group input.invalid {
+    background-color: rgba(255, 107, 107, 0.1);
+    box-shadow: 0 0 0 1px #ff6b6b;
+}
+
+.input-group input.valid {
+    box-shadow: 0 0 0 1px var(--secondary-color);
+}
+
+.form-success {
+    display: block;
+    min-height: 16px;
+    font-size: 12px;
+    color: var(--secondary-color);
+    margin: 8px 0 4px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.form-success.show {
+    opacity: 1;
+}
+
+button[type="submit"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+button[type="submit"]:disabled:active {
+    transform: none;
 }
