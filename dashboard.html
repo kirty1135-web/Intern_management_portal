@@ -1,0 +1,2697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaunchPad | Intern Management Hub</title>
+    <!-- Fonts: Lora (Serif) & Plus Jakarta Sans (Sans-serif) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ------------------ DESIGN SYSTEM & CONFIG ------------------ */
+        :root {
+            --bg-dark: #050c0e;
+            --glass-card: rgba(10, 25, 30, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --glass-border-hover: rgba(255, 255, 255, 0.15);
+            --glass-border-focus: rgba(20, 184, 166, 0.3);
+            
+            /* Accents - Premium Deep Teal + Coral + Amber Gold */
+            --accent-teal: #14b8a6;
+            --accent-teal-rgb: 20, 184, 166;
+            --accent-coral: #ff7a5b;
+            --accent-coral-rgb: 255, 122, 91;
+            --accent-gold: #fbbf24;
+            --accent-gold-rgb: 251, 191, 36;
+            
+            /* Text States */
+            --text-primary: #f1f7f6;
+            --text-muted: #8fa8a8;
+            --text-dark: #4b6b6c;
+            
+            /* Semantic Colors */
+            --success: #10b981;
+            --warning: #f43f5e;
+            
+            /* Typography */
+            --font-display: 'Lora', serif;
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+            
+            /* Transitions */
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ------------------ BASE STYLES ------------------ */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(20, 184, 166, 0.15) transparent;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(20, 184, 166, 0.2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-teal);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* ------------------ AMBIENT GLOW SYSTEM ------------------ */
+        .ambient-glows {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glow-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.2;
+            animation: pulseGlow 22s infinite alternate ease-in-out;
+        }
+
+        .glow-blob-1 {
+            top: -10%;
+            left: -10%;
+            width: 550px;
+            height: 550px;
+            background: radial-gradient(circle, var(--accent-teal), transparent 70%);
+        }
+
+        .glow-blob-2 {
+            bottom: -5%;
+            right: -5%;
+            width: 650px;
+            height: 650px;
+            background: radial-gradient(circle, var(--accent-coral), transparent 70%);
+            animation-delay: -5s;
+        }
+
+        .glow-blob-3 {
+            top: 40%;
+            left: 45%;
+            width: 480px;
+            height: 480px;
+            background: radial-gradient(circle, var(--accent-gold), transparent 70%);
+            animation-delay: -10s;
+        }
+
+        @keyframes pulseGlow {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                transform: translate(60px, -60px) scale(1.15);
+            }
+        }
+
+        /* ------------------ LAYOUT WRAPPER ------------------ */
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ------------------ LEFT SIDEBAR ------------------ */
+        aside.sidebar {
+            background: rgba(8, 20, 24, 0.5);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 2.5rem 1.75rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            z-index: 100;
+            transition: var(--transition-smooth);
+        }
+
+        /* User Profile Card */
+        .profile-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-card:hover {
+            border-color: var(--accent-teal);
+            box-shadow: 0 4px 20px rgba(20, 184, 166, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent-teal), var(--accent-coral));
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-coral));
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: var(--bg-dark);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background-color: var(--success);
+            border: 2px solid var(--bg-dark);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            box-shadow: 0 0 10px var(--success);
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: var(--text-primary);
+        }
+
+        .profile-role {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        /* Navigation Links */
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--glass-border);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(20, 184, 166, 0.12) 0%, rgba(255, 255, 255, 0.01) 100%);
+            border-left: 3px solid var(--accent-teal);
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+            color: var(--accent-teal);
+        }
+
+        .nav-item.active i {
+            color: var(--accent-teal);
+        }
+
+        /* Sign Out Button */
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 1.5rem;
+        }
+
+        .btn-signout {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            color: #fca5a5;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            border: 1px solid transparent;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+        }
+
+        .btn-signout:hover {
+            background: rgba(244, 63, 94, 0.08);
+            border-color: rgba(244, 63, 94, 0.2);
+            transform: translateX(4px);
+        }
+
+        /* ------------------ MAIN CONTAINER ------------------ */
+        main.main-content {
+            padding: 2rem 3rem;
+            overflow-y: auto;
+            max-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            z-index: 10;
+        }
+
+        /* ------------------ TOP HEADER BAR ------------------ */
+        header.header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Brand App Name */
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-logo-container {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-coral));
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(20, 184, 166, 0.35);
+        }
+
+        .brand-logo-container svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--bg-dark);
+        }
+
+        .brand-name {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent-teal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        /* Search Bar */
+        .search-container {
+            position: relative;
+            flex-grow: 1;
+            max-width: 450px;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 1.1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 0.75rem 1rem 0.75rem 2.8rem;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-teal);
+            box-shadow: 0 0 15px rgba(20, 184, 166, 0.15);
+            background: rgba(12, 34, 40, 0.85);
+        }
+
+        .search-shortcut {
+            position: absolute;
+            right: 1.1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        /* Header Actions Area */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        /* Notification Bell with Dropdown */
+        .notification-container {
+            position: relative;
+        }
+
+        .notification-btn {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+
+        .notification-btn:hover {
+            border-color: var(--accent-teal);
+            background: rgba(255, 255, 255, 0.04);
+            transform: translateY(-2px);
+        }
+
+        .bell-badge {
+            width: 9px;
+            height: 9px;
+            background-color: var(--accent-coral);
+            border: 2px solid var(--bg-dark);
+            border-radius: 50%;
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            box-shadow: 0 0 8px var(--accent-coral);
+        }
+
+        /* Notification Dropdown Panel */
+        .notification-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            width: 320px;
+            background: rgba(8, 22, 26, 0.95);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: var(--transition-smooth);
+            z-index: 150;
+        }
+
+        .notification-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .noti-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .noti-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .noti-clear {
+            font-size: 0.75rem;
+            color: var(--accent-teal);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .noti-clear:hover {
+            color: var(--text-primary);
+        }
+
+        .noti-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .noti-item {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+        }
+
+        .noti-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .noti-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-teal);
+            flex-shrink: 0;
+            margin-top: 5px;
+        }
+
+        .noti-dot.read {
+            background-color: transparent;
+        }
+
+        .noti-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .noti-text {
+            font-size: 0.8rem;
+            line-height: 1.3;
+            color: var(--text-primary);
+        }
+
+        .noti-time {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Action Button */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-teal), #0f766e);
+            color: var(--text-primary);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+            transition: var(--transition-smooth);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(20, 184, 166, 0.45);
+            background: linear-gradient(135deg, #14b8a6, var(--accent-coral));
+        }
+
+        .btn-primary:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* Hamburger Menu Icon (hidden on desktop) */
+        .mobile-toggle {
+            display: none;
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.25rem;
+        }
+
+        /* ------------------ WELCOME/HERO BANNER ------------------ */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.08) 0%, rgba(255, 122, 91, 0.03) 100%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 3rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.01);
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(20, 184, 166, 0.12), transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .hero-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-width: 60%;
+        }
+
+        .hero-tag {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-coral);
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 500;
+            line-height: 1.2;
+            color: var(--text-primary);
+        }
+
+        .hero-title em {
+            font-style: italic;
+            font-family: var(--font-display);
+            color: var(--accent-teal);
+            font-weight: 400;
+        }
+
+        .hero-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Banner Illustration SVG */
+        .hero-illustration {
+            width: 200px;
+            height: 200px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .svg-art {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 20px rgba(20, 184, 166, 0.25));
+        }
+
+        .orbit-line {
+            transform-origin: center;
+            animation: rotateOrbit 30s linear infinite;
+        }
+
+        .orbit-line-reverse {
+            transform-origin: center;
+            animation: rotateOrbitReverse 25s linear infinite;
+        }
+
+        .pulsing-node {
+            animation: pulseNode 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes rotateOrbit {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes rotateOrbitReverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+
+        @keyframes pulseNode {
+            0% { r: 4px; opacity: 0.6; }
+            100% { r: 7px; opacity: 1; }
+        }
+
+        /* ------------------ STAT CARDS ROW ------------------ */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--glass-border-hover);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+            transition: var(--transition-smooth);
+        }
+
+        .stat-card:hover::after {
+            background: linear-gradient(90deg, var(--accent-teal), var(--accent-coral));
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .stat-icon-wrapper {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            color: var(--accent-teal);
+            transition: var(--transition-smooth);
+        }
+
+        .stat-card:hover .stat-icon-wrapper {
+            background: rgba(20, 184, 166, 0.15);
+            color: var(--text-primary);
+            border-color: var(--accent-teal);
+        }
+
+        .stat-card.coral-accent:hover .stat-icon-wrapper {
+            background: rgba(255, 122, 91, 0.15);
+            color: var(--accent-coral);
+            border-color: var(--accent-coral);
+        }
+
+        .stat-card.coral-accent:hover::after {
+            background: linear-gradient(90deg, var(--accent-coral), var(--accent-gold));
+        }
+
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 1.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stat-footer {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-weight: 700;
+        }
+
+        .stat-trend.positive {
+            color: var(--success);
+        }
+
+        .stat-trend.warning {
+            color: var(--accent-coral);
+        }
+
+        /* ------------------ TWO-COLUMN BENTO GRID ------------------ */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .bento-card {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .bento-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+        }
+
+        .bento-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .bento-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            display: block;
+        }
+
+        /* Left Column: Tasks Submissions list styling */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .task-card {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+            transition: var(--transition-smooth);
+            position: relative;
+        }
+
+        .task-card:hover {
+            border-color: rgba(20, 184, 166, 0.25);
+            background: rgba(20, 184, 166, 0.02);
+            transform: translateX(2px);
+        }
+
+        .task-main {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-grow: 1;
+        }
+
+        /* Custom Checkbox styles */
+        .checkbox-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .checkbox-custom {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            transition: var(--transition-smooth);
+        }
+
+        .checkbox-wrapper:hover .checkbox-custom {
+            border-color: var(--accent-teal);
+            background-color: rgba(20, 184, 166, 0.05);
+        }
+
+        .checkbox-input:checked ~ .checkbox-custom {
+            background-color: var(--accent-teal);
+            border-color: transparent;
+        }
+
+        .checkbox-custom::after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 7px;
+            top: 3px;
+            width: 4px;
+            height: 9px;
+            border: solid var(--bg-dark);
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .checkbox-input:checked ~ .checkbox-custom::after {
+            display: block;
+        }
+
+        .task-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .task-title {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: var(--transition-smooth);
+        }
+
+        /* Strike-through completed tasks styling */
+        .task-card.completed .task-title {
+            text-decoration: line-through;
+            color: var(--text-dark);
+        }
+
+        .task-card.completed {
+            border-color: rgba(255, 255, 255, 0.02);
+            opacity: 0.85;
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .task-project {
+            font-weight: 700;
+            color: var(--accent-teal);
+        }
+
+        /* Priority Badge Tags */
+        .priority-tag {
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .priority-tag.high {
+            background-color: rgba(244, 63, 94, 0.1);
+            color: var(--accent-coral);
+        }
+
+        .priority-tag.medium {
+            background-color: rgba(251, 191, 36, 0.1);
+            color: var(--accent-gold);
+        }
+
+        .priority-tag.review {
+            background-color: rgba(20, 184, 166, 0.1);
+            color: var(--accent-teal);
+        }
+
+        .task-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .assignee-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid var(--accent-teal);
+            object-fit: cover;
+        }
+
+        .delete-task-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-dark);
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: var(--transition-smooth);
+            padding: 4px;
+        }
+
+        .delete-task-btn:hover {
+            color: var(--accent-coral);
+            transform: scale(1.1);
+        }
+
+        /* ------------------ WIDGETS COLUMN (RIGHT) ------------------ */
+        .widgets-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Progress ring widget flex */
+        .progress-widget {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .progress-ring-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            flex-shrink: 0;
+        }
+
+        .progress-ring-svg {
+            width: 120px;
+            height: 120px;
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.02);
+            stroke-width: 8;
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke: url(#ring-gradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 326.72; /* 2 * PI * 52 */
+            stroke-dashoffset: 81.68; /* Initial 75% representation */
+            transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-value-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .progress-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .progress-info-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--accent-teal);
+        }
+
+        .progress-info-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Streak Tracker */
+        .streak-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .streak-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .streak-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .streak-count {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--accent-coral);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .streak-days {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.25rem;
+        }
+
+        .streak-day-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .streak-bubble {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.01);
+            transition: var(--transition-smooth);
+        }
+
+        .streak-day-node:hover .streak-bubble {
+            border-color: var(--accent-coral);
+            color: var(--accent-coral);
+            background: rgba(255, 122, 91, 0.08);
+            transform: scale(1.08);
+        }
+
+        .streak-day-node.active .streak-bubble {
+            background: linear-gradient(135deg, var(--accent-coral), var(--accent-gold));
+            border-color: transparent;
+            color: var(--bg-dark);
+            box-shadow: 0 0 10px rgba(255, 122, 91, 0.4);
+        }
+
+        .streak-day-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .streak-day-node.active .streak-day-label {
+            color: var(--accent-coral);
+            font-weight: 700;
+        }
+
+        /* Work Log Chart */
+        .work-log-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-total {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent-teal);
+        }
+
+        .chart-bars {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 120px;
+            padding-top: 15px;
+            position: relative;
+        }
+
+        .chart-bar-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            flex-grow: 1;
+            height: 100%;
+            justify-content: flex-end;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .chart-bar-wrapper {
+            width: 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            position: relative;
+            transition: var(--transition-smooth);
+        }
+
+        .chart-bar-fill {
+            width: 100%;
+            border-radius: 12px;
+            background: linear-gradient(to top, var(--accent-teal), #0f766e);
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .chart-bar-col:hover .chart-bar-wrapper {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .chart-bar-col:hover .chart-bar-fill {
+            background: linear-gradient(to top, var(--accent-coral), var(--accent-gold));
+            box-shadow: 0 0 12px rgba(255, 122, 91, 0.4);
+        }
+
+        /* Tooltip style */
+        .chart-tooltip {
+            position: absolute;
+            top: -24px;
+            background: rgba(8, 22, 26, 0.95);
+            border: 1px solid var(--accent-teal);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: var(--transition-smooth);
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .chart-bar-col:hover .chart-tooltip {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .chart-day-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Upcoming items (Right Column Schedule) */
+        .schedule-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .schedule-card {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            display: flex;
+            gap: 1rem;
+            transition: var(--transition-smooth);
+        }
+
+        .schedule-card:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--glass-border-hover);
+            transform: translateY(-2px);
+        }
+
+        .schedule-time-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(20, 184, 166, 0.08);
+            border: 1px solid rgba(20, 184, 166, 0.2);
+            color: var(--accent-teal);
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            font-family: var(--font-display);
+        }
+
+        .schedule-time-hour {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .schedule-time-period {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .schedule-card.coral-style .schedule-time-box {
+            background: rgba(255, 122, 91, 0.08);
+            border-color: rgba(255, 122, 91, 0.2);
+            color: var(--accent-coral);
+        }
+
+        .schedule-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .schedule-event-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .schedule-event-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        /* ------------------ MODAL DIALOGS ------------------ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(4, 10, 12, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition-smooth);
+            z-index: 200;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: rgba(8, 22, 26, 0.95);
+            border: 1px solid var(--glass-border-focus);
+            border-radius: 24px;
+            width: 480px;
+            max-width: 90%;
+            padding: 2.25rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+            transform: scale(0.9);
+            transition: var(--transition-smooth);
+        }
+
+        .modal-overlay.show .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: var(--transition-smooth);
+        }
+
+        .modal-close:hover {
+            color: var(--accent-teal);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-teal);
+            background: rgba(8, 22, 26, 0.8);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.75rem;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 0.75rem 1.25rem;
+            border-radius: 25px;
+            font-family: var(--font-sans);
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--text-muted);
+        }
+
+        /* ------------------ TOAST POPUPS ------------------ */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            z-index: 300;
+        }
+
+        .toast-msg {
+            background: rgba(8, 22, 26, 0.9);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(20, 184, 166, 0.3); /* Green/teal outline for success default */
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateX(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast-msg.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-icon {
+            color: var(--accent-teal);
+            font-size: 1.1rem;
+        }
+
+        .toast-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* ------------------ MOBILE RESPONSIVENESS ------------------ */
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 240px 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+
+            /* Sidebar Drawer Overlay */
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(4, 10, 12, 0.7);
+                backdrop-filter: blur(5px);
+                z-index: 95;
+                opacity: 0;
+                visibility: hidden;
+                transition: var(--transition-smooth);
+            }
+
+            .sidebar-overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            aside.sidebar {
+                position: fixed;
+                top: 0;
+                left: -280px;
+                width: 280px;
+                height: 100vh;
+                background: rgba(8, 20, 24, 0.98);
+                z-index: 100;
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6);
+            }
+
+            aside.sidebar.open {
+                left: 0;
+            }
+
+            /* Header Adjustments */
+            .mobile-toggle {
+                display: flex;
+            }
+
+            header.header-bar {
+                gap: 1rem;
+            }
+
+            .search-container {
+                max-width: 100%;
+                order: 3;
+                width: 100%;
+            }
+
+            header.header-bar {
+                flex-wrap: wrap;
+            }
+
+            .brand {
+                order: 1;
+            }
+
+            .header-actions {
+                order: 2;
+                margin-left: auto;
+            }
+
+            main.main-content {
+                padding: 1.5rem;
+            }
+
+            .hero-banner {
+                padding: 2rem;
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+
+            .hero-text {
+                max-width: 100%;
+            }
+
+            .hero-illustration {
+                width: 150px;
+                height: 150px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-title {
+                font-size: 2rem;
+            }
+            .progress-widget {
+                flex-direction: column;
+                text-align: center;
+            }
+            .chart-bars {
+                height: 100px;
+            }
+            .chart-bar-wrapper {
+                width: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient glowing shapes -->
+    <div class="ambient-glows">
+        <div class="glow-blob glow-blob-1"></div>
+        <div class="glow-blob glow-blob-2"></div>
+        <div class="glow-blob glow-blob-3"></div>
+    </div>
+
+    <!-- Mobile Sidebar Drawer Backdrop -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Container Grid -->
+    <div class="app-container">
+
+        <!-- Sidebar Navigation Drawer -->
+        <aside class="sidebar" id="sidebar">
+            <!-- User Profile Card -->
+            <div class="profile-card">
+                <div class="avatar-container">
+                    <img src="avatar.png" alt="Sarah Jenkins" class="avatar-img" onerror="this.src='https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80'">
+                    <span class="status-dot"></span>
+                </div>
+                <div class="profile-info">
+                    <span class="profile-name">Sarah Jenkins</span>
+                    <span class="profile-role">Cohort Lead / Mentor</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="Dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="Interns">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Intern Profiles</span>
+                </a>
+                <a href="#" class="nav-item" data-section="Tasks">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Cohort Tasks</span>
+                </a>
+                <a href="#" class="nav-item" data-section="Schedule">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Weekly Schedule</span>
+                </a>
+                <a href="#" class="nav-item" data-section="Evaluations">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <span>Evaluation Queue</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer Sign out -->
+            <div class="sidebar-footer">
+                <button class="btn-signout" id="signOutBtn">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Sign Out</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+
+            <!-- Top Header Bar -->
+            <header class="header-bar">
+                <div class="mobile-toggle" id="mobileMenuToggle">
+                    <i class="fa-solid fa-bars"></i>
+                </div>
+                <div class="brand">
+                    <div class="brand-logo-container">
+                        <!-- Custom abstract geometric rocket logo -->
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2C11 5 8 9 8 13C8 15.2 9.8 17 12 17C14.2 17 16 15.2 16 13C16 9 13 2 12 2ZM8 14L4 18L8 16V14ZM16 14L20 18L16 16V14Z" />
+                        </svg>
+                    </div>
+                    <span class="brand-name">LaunchPad</span>
+                </div>
+
+                <!-- Global App Search -->
+                <div class="search-container">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" class="search-input" placeholder="Search interns, submissions, projects..." id="searchBar">
+                    <span class="search-shortcut">⌘K</span>
+                </div>
+
+                <!-- Action Items Area -->
+                <div class="header-actions">
+                    <!-- Notification Bell Button -->
+                    <div class="notification-container">
+                        <div class="notification-btn" id="notificationBtn">
+                            <i class="fa-regular fa-bell"></i>
+                            <span class="bell-badge" id="bellBadge"></span>
+                        </div>
+                        
+                        <!-- Notification List Dropdown -->
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <div class="noti-header">
+                                <span class="noti-title">Notifications</span>
+                                <a href="#" class="noti-clear" id="notiClearAll">Mark read</a>
+                            </div>
+                            <div class="noti-list" id="notiList">
+                                <div class="noti-item" data-id="1">
+                                    <span class="noti-dot"></span>
+                                    <div class="noti-content">
+                                        <span class="noti-text">Liam Vance submitted task **Refactor Dashboard Controllers**</span>
+                                        <span class="noti-time">24 mins ago</span>
+                                    </div>
+                                </div>
+                                <div class="noti-item" data-id="2">
+                                    <span class="noti-dot"></span>
+                                    <div class="noti-content">
+                                        <span class="noti-text">Chloe Jenkins requested evaluation on **Midterm Goals**</span>
+                                        <span class="noti-time">2 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="noti-item" data-id="3">
+                                    <span class="noti-dot"></span>
+                                    <div class="noti-content">
+                                        <span class="noti-text">Marcus Peterson logged **8.5 coding hours** on database</span>
+                                        <span class="noti-time">1 day ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Create Task Action -->
+                    <button class="btn-primary" id="btnCreateTask">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Assign Task</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Large Welcome Hero Banner -->
+            <section class="hero-banner">
+                <div class="hero-text">
+                    <span class="hero-tag">Cohort Guidance & Metrics</span>
+                    <h1 class="hero-title">Empower your cohort, <em>Sarah.</em></h1>
+                    <p class="hero-desc">Cohort Alpha is showing great velocity. You have 4 task reviews pending review. Weekly mentorship evaluations are due in 2 days before the Friday showcase.</p>
+                </div>
+                <!-- Inline SVG Custom Rocket Launch Illustration -->
+                <div class="hero-illustration">
+                    <svg class="svg-art" viewBox="0 0 100 100">
+                        <defs>
+                            <linearGradient id="rocket-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="var(--accent-coral)" />
+                                <stop offset="100%" stop-color="#f43f5e" />
+                            </linearGradient>
+                            <linearGradient id="trail-grad" x1="0%" y1="100%" x2="0%" y2="0%">
+                                <stop offset="0%" stop-color="rgba(255, 122, 91, 0)" />
+                                <stop offset="100%" stop-color="rgba(255, 122, 91, 0.4)" />
+                            </linearGradient>
+                            <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="var(--accent-teal)" />
+                                <stop offset="100%" stop-color="var(--accent-coral)" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Orbital Lines representing training path -->
+                        <ellipse cx="50" cy="50" rx="35" ry="12" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="0.75" transform="rotate(-30, 50, 50)" />
+                        <ellipse cx="50" cy="50" rx="42" ry="16" fill="none" stroke="var(--accent-teal)" stroke-dasharray="6, 4" stroke-width="0.5" opacity="0.3" transform="rotate(-30, 50, 50)" />
+                        <!-- Central Rocket lifting off representing cohort growth -->
+                        <path d="M 50 62 L 47 88 L 53 88 Z" fill="url(#trail-grad)"/>
+                        <path d="M 50 25 C 46 38 46 55 46 62 L 54 62 C 54 55 54 38 50 25 Z" fill="url(#rocket-grad)"/>
+                        <path d="M 50 25 C 48 30 48 35 46 38 L 54 38 C 52 35 52 30 50 25 Z" fill="#fff" opacity="0.9"/>
+                        <path d="M 46 55 L 40 65 L 46 62 Z" fill="var(--accent-coral)"/>
+                        <path d="M 54 55 L 60 65 L 54 62 Z" fill="var(--accent-coral)"/>
+                        <circle cx="50" cy="45" r="2.5" fill="var(--bg-dark)" stroke="#fff" stroke-width="0.75"/>
+                        <!-- Glowing nodes along path -->
+                        <circle cx="21" cy="42" r="3.5" fill="var(--accent-gold)" class="pulsing-node" />
+                        <circle cx="78" cy="58" r="2.5" fill="var(--accent-teal)" />
+                        <circle cx="50" cy="9" r="1.5" fill="var(--text-primary)" />
+                    </svg>
+                </div>
+            </section>
+
+            <!-- Row of Stat Cards -->
+            <section class="stats-grid">
+                <!-- Stat Card 1 -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Active Interns</span>
+                        <div class="stat-icon-wrapper">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">14</div>
+                    <div class="stat-footer">
+                        <span class="stat-trend positive">
+                            <i class="fa-solid fa-arrow-trend-up"></i> +2
+                        </span>
+                        <span>enrolled this week</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="stat-card" id="hoursStatCard">
+                    <div class="stat-header">
+                        <span class="stat-title">Hours Mentored</span>
+                        <div class="stat-icon-wrapper">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="totalHoursVal">24.5 hrs</div>
+                    <div class="stat-footer">
+                        <span class="stat-trend positive" id="hoursDayVal">
+                            4.5h logged today
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Tasks Resolved</span>
+                        <div class="stat-icon-wrapper">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">88%</div>
+                    <div class="stat-footer">
+                        <span class="stat-trend positive">
+                            <i class="fa-solid fa-arrow-trend-up"></i> +3%
+                        </span>
+                        <span>completion index</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 4 -->
+                <div class="stat-card coral-accent">
+                    <div class="stat-header">
+                        <span class="stat-title">Pending Reviews</span>
+                        <div class="stat-icon-wrapper">
+                            <i class="fa-solid fa-clipboard-question"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">4 Evaluates</div>
+                    <div class="stat-footer">
+                        <span class="stat-trend warning">
+                            <i class="fa-solid fa-triangle-exclamation"></i> 2 due
+                        </span>
+                        <span>by 5:00 PM</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Two-Column Bento Layout -->
+            <section class="bento-grid">
+                
+                <!-- Left Column: Tasks Queue Bento Card -->
+                <div class="bento-card">
+                    <div class="bento-header">
+                        <div class="bento-title-wrapper">
+                            <h2 class="bento-title">Intern Task Submissions</h2>
+                            <span class="bento-subtitle" id="taskSubtext">3 completed of 4 tasks</span>
+                        </div>
+                    </div>
+
+                    <!-- Task Queue Cards (Bento list layout) -->
+                    <div class="task-list" id="taskList">
+                        <!-- Task 1 -->
+                        <div class="task-card completed" data-id="1">
+                            <div class="task-main">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox-input task-toggle" checked>
+                                    <span class="checkbox-custom"></span>
+                                </label>
+                                <div class="task-details">
+                                    <span class="task-title">Refactor Dashboard Controllers</span>
+                                    <div class="task-meta">
+                                        <span class="task-project">Liam Vance</span>
+                                        <span>•</span>
+                                        <span class="priority-tag high">High Priority</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="task-right">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=60&q=80" alt="Liam" class="assignee-avatar" title="Submitted by Liam">
+                                <button class="delete-task-btn"><i class="fa-regular fa-trash-can"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Task 2 -->
+                        <div class="task-card completed" data-id="2">
+                            <div class="task-main">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox-input task-toggle" checked>
+                                    <span class="checkbox-custom"></span>
+                                </label>
+                                <div class="task-details">
+                                    <span class="task-title">Design Onboarding User Flow</span>
+                                    <div class="task-meta">
+                                        <span class="task-project">Chloe Jenkins</span>
+                                        <span>•</span>
+                                        <span class="priority-tag medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="task-right">
+                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=60&q=80" alt="Chloe" class="assignee-avatar" title="Submitted by Chloe">
+                                <button class="delete-task-btn"><i class="fa-regular fa-trash-can"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Task 3 -->
+                        <div class="task-card" data-id="3">
+                            <div class="task-main">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox-input task-toggle">
+                                    <span class="checkbox-custom"></span>
+                                </label>
+                                <div class="task-details">
+                                    <span class="task-title">Database Schema Migration</span>
+                                    <div class="task-meta">
+                                        <span class="task-project">Marcus Peterson</span>
+                                        <span>•</span>
+                                        <span class="priority-tag medium">Medium Priority</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="task-right">
+                                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=60&q=80" alt="Marcus" class="assignee-avatar" title="Submitted by Marcus">
+                                <button class="delete-task-btn"><i class="fa-regular fa-trash-can"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Task 4 -->
+                        <div class="task-card completed" data-id="4">
+                            <div class="task-main">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" class="checkbox-input task-toggle" checked>
+                                    <span class="checkbox-custom"></span>
+                                </label>
+                                <div class="task-details">
+                                    <span class="task-title">Deploy Staging Server</span>
+                                    <div class="task-meta">
+                                        <span class="task-project">Sofia Rodriguez</span>
+                                        <span>•</span>
+                                        <span class="priority-tag review">Review Queue</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="task-right">
+                                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=60&q=80" alt="Sofia" class="assignee-avatar" title="Submitted by Sofia">
+                                <button class="delete-task-btn"><i class="fa-regular fa-trash-can"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Interactive Widgets & Upcoming Schedule -->
+                <div class="widgets-container">
+                    
+                    <!-- Progress & Velocity Widget -->
+                    <div class="bento-card">
+                        <div class="bento-header">
+                            <div class="bento-title-wrapper">
+                                <h2 class="bento-title">Cohort Progress</h2>
+                                <span class="bento-subtitle">Real-time cohort sprint resolving score</span>
+                            </div>
+                        </div>
+
+                        <!-- Ring progress widget -->
+                        <div class="progress-widget">
+                            <div class="progress-ring-container">
+                                <svg class="progress-ring-svg">
+                                    <circle class="progress-ring-bg" cx="60" cy="60" r="52" />
+                                    <circle class="progress-ring-circle" id="progressRing" cx="60" cy="60" r="52" />
+                                </svg>
+                                <span class="progress-value-text" id="progressPctText">75%</span>
+                            </div>
+                            <div class="progress-info">
+                                <span class="progress-info-title" id="progressLabelTitle">Velocity: Outstanding</span>
+                                <span class="progress-info-desc" id="progressLabelDesc">Based on 3 completed milestones of 4 submissions in this week's evaluation list.</span>
+                            </div>
+                        </div>
+
+                        <!-- Streak Tracker -->
+                        <div class="streak-container">
+                            <div class="streak-header-row">
+                                <span class="streak-title">Feedback Streak</span>
+                                <span class="streak-count">
+                                    <i class="fa-solid fa-fire"></i>
+                                    <span id="streakCountVal">5 Days Mentor Activity</span>
+                                </span>
+                            </div>
+                            <div class="streak-days" id="streakDaysRow">
+                                <!-- Days (M to S) -->
+                                <div class="streak-day-node active" data-day="Mon">
+                                    <div class="streak-bubble"><i class="fa-solid fa-check"></i></div>
+                                    <span class="streak-day-label">Mon</span>
+                                </div>
+                                <div class="streak-day-node active" data-day="Tue">
+                                    <div class="streak-bubble"><i class="fa-solid fa-check"></i></div>
+                                    <span class="streak-day-label">Tue</span>
+                                </div>
+                                <div class="streak-day-node active" data-day="Wed">
+                                    <div class="streak-bubble"><i class="fa-solid fa-check"></i></div>
+                                    <span class="streak-day-label">Wed</span>
+                                </div>
+                                <div class="streak-day-node active" data-day="Thu">
+                                    <div class="streak-bubble"><i class="fa-solid fa-check"></i></div>
+                                    <span class="streak-day-label">Thu</span>
+                                </div>
+                                <div class="streak-day-node active" data-day="Fri">
+                                    <div class="streak-bubble"><i class="fa-solid fa-check"></i></div>
+                                    <span class="streak-day-label">Fri</span>
+                                </div>
+                                <div class="streak-day-node" data-day="Sat">
+                                    <div class="streak-bubble">S</div>
+                                    <span class="streak-day-label">Sat</span>
+                                </div>
+                                <div class="streak-day-node" data-day="Sun">
+                                    <div class="streak-bubble">S</div>
+                                    <span class="streak-day-label">Sun</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Work Log Chart -->
+                        <div class="work-log-container">
+                            <div class="chart-header">
+                                <span class="chart-title">Weekly Mentorship Hours</span>
+                                <span class="chart-total" id="chartTotalHours">Total: 24.5 hrs</span>
+                            </div>
+                            <div class="chart-bars" id="chartBars">
+                                <div class="chart-bar-col" data-day="Mon" data-hours="4.5">
+                                    <span class="chart-tooltip">Mon: 4.5h</span>
+                                    <div class="chart-bar-wrapper">
+                                        <div class="chart-bar-fill" style="height: 56.25%"></div>
+                                    </div>
+                                    <span class="chart-day-label">M</span>
+                                </div>
+                                <div class="chart-bar-col" data-day="Tue" data-hours="5">
+                                    <span class="chart-tooltip">Tue: 5.0h</span>
+                                    <div class="chart-bar-wrapper">
+                                        <div class="chart-bar-fill" style="height: 62.5%"></div>
+                                    </div>
+                                    <span class="chart-day-label">T</span>
+                                </div>
+                                <div class="chart-bar-col" data-day="Wed" data-hours="6">
+                                    <span class="chart-tooltip">Wed: 6.0h</span>
+                                    <div class="chart-bar-wrapper">
+                                        <div class="chart-bar-fill" style="height: 75%"></div>
+                                    </div>
+                                    <span class="chart-day-label">W</span>
+                                </div>
+                                <div class="chart-bar-col" data-day="Thu" data-hours="4.5">
+                                    <span class="chart-tooltip">Thu: 4.5h</span>
+                                    <div class="chart-bar-wrapper">
+                                        <div class="chart-bar-fill" style="height: 56.25%"></div>
+                                    </div>
+                                    <span class="chart-day-label">T</span>
+                                </div>
+                                <div class="chart-bar-col" data-day="Fri" data-hours="4.5">
+                                    <span class="chart-tooltip">Fri: 4.5h</span>
+                                    <div class="chart-bar-wrapper">
+                                        <div class="chart-bar-fill" style="height: 56.25%"></div>
+                                    </div>
+                                    <span class="chart-day-label">F</span>
+                                </div>
+                            </div>
+                            <p style="font-size: 0.65rem; color: var(--text-muted); text-align: center; margin-top: -5px;">💡 Click on any bar to modify and log extra mentoring hours!</p>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Events Card -->
+                    <div class="bento-card">
+                        <div class="bento-header">
+                            <div class="bento-title-wrapper">
+                                <h2 class="bento-title">Weekly Schedule</h2>
+                                <span class="bento-subtitle">Deadlines, Syncs & Presentation checks</span>
+                            </div>
+                        </div>
+
+                        <!-- Events List -->
+                        <div class="schedule-list">
+                            <!-- Event 1 -->
+                            <div class="schedule-card">
+                                <div class="schedule-time-box">
+                                    <span class="schedule-time-hour">02</span>
+                                    <span class="schedule-time-period">PM</span>
+                                </div>
+                                <div class="schedule-details">
+                                    <span class="schedule-event-title">Cohort Sync & Check-in</span>
+                                    <span class="schedule-event-desc">Discuss progress blockers, task review guidelines, and staging server setup.</span>
+                                </div>
+                            </div>
+
+                            <!-- Event 2 -->
+                            <div class="schedule-card coral-style">
+                                <div class="schedule-time-box">
+                                    <span class="schedule-time-hour">04</span>
+                                    <span class="schedule-time-period">PM</span>
+                                </div>
+                                <div class="schedule-details">
+                                    <span class="schedule-event-title">Final Demo Rehearsal</span>
+                                    <span class="schedule-event-desc">Review slides and project demos of interns prior to the executive showcase.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Create Brief Modal Dialog -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Assign Cohort Task</h3>
+                <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="createTaskForm">
+                <div class="form-group">
+                    <label class="form-label" for="taskNameInput">Task Details / Brief</label>
+                    <input type="text" id="taskNameInput" class="form-control" placeholder="e.g., Implement OAuth2 flow..." required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="taskProjectInput">Intern Name</label>
+                        <input type="text" id="taskProjectInput" class="form-control" placeholder="e.g., Liam Vance" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="taskPriorityInput">Priority</label>
+                        <select id="taskPriorityInput" class="form-control" style="background: rgba(8, 22, 26, 0.95);">
+                            <option value="high">High Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="review">Review Queue</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="taskAssigneeInput">Intern Assignee Avatar</label>
+                    <select id="taskAssigneeInput" class="form-control" style="background: rgba(8, 22, 26, 0.95);">
+                        <option value="liam">Liam Vance</option>
+                        <option value="chloe">Chloe Jenkins</option>
+                        <option value="marcus">Marcus Peterson</option>
+                        <option value="sofia">Sofia Rodriguez</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" id="modalCancel">Cancel</button>
+                    <button type="submit" class="btn-primary">Assign Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification System -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ------------------ DATA DEFINITIONS & INITIAL STATES ------------------
+        let tasks = [
+            { id: 1, title: 'Refactor Dashboard Controllers', project: 'Liam Vance', priority: 'high', completed: true, assignee: 'liam' },
+            { id: 2, title: 'Design Onboarding User Flow', project: 'Chloe Jenkins', priority: 'medium', completed: true, assignee: 'chloe' },
+            { id: 3, title: 'Database Schema Migration', project: 'Marcus Peterson', priority: 'medium', completed: false, assignee: 'marcus' },
+            { id: 4, title: 'Deploy Staging Server', project: 'Sofia Rodriguez', priority: 'review', completed: true, assignee: 'sofia' }
+        ];
+
+        const assigneeAvatars = {
+            liam: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=60&q=80',
+            chloe: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=60&q=80',
+            marcus: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=60&q=80',
+            sofia: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=60&q=80'
+        };
+
+        const assigneeNames = {
+            liam: 'Liam Vance',
+            chloe: 'Chloe Jenkins',
+            marcus: 'Marcus Peterson',
+            sofia: 'Sofia Rodriguez'
+        };
+
+        // ------------------ SELECT DOM ELEMENTS ------------------
+        const taskListEl = document.getElementById('taskList');
+        const taskSubtextEl = document.getElementById('taskSubtext');
+        const progressRingCircle = document.getElementById('progressRing');
+        const progressPctText = document.getElementById('progressPctText');
+        const progressLabelTitle = document.getElementById('progressLabelTitle');
+        const progressLabelDesc = document.getElementById('progressLabelDesc');
+        const toastContainer = document.getElementById('toastContainer');
+        const taskModal = document.getElementById('taskModal');
+        const btnCreateTask = document.getElementById('btnCreateTask');
+        const modalClose = document.getElementById('modalClose');
+        const modalCancel = document.getElementById('modalCancel');
+        const createTaskForm = document.getElementById('createTaskForm');
+        
+        // Navigation items
+        const navItems = document.querySelectorAll('.nav-item');
+        
+        // Mobile Sidebar toggles
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        // Notification Elements
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const notiList = document.getElementById('notiList');
+        const notiClearAll = document.getElementById('notiClearAll');
+        const bellBadge = document.getElementById('bellBadge');
+
+        // Search Bar Keyboard shortcuts
+        const searchBar = document.getElementById('searchBar');
+
+        // Work Log Chart Items
+        const chartBars = document.getElementById('chartBars');
+        const chartTotalHours = document.getElementById('chartTotalHours');
+        const totalHoursVal = document.getElementById('totalHoursVal');
+        const hoursDayVal = document.getElementById('hoursDayVal');
+
+        // Streak Tracker Node items
+        const streakDaysRow = document.getElementById('streakDaysRow');
+        const streakCountVal = document.getElementById('streakCountVal');
+
+        // Sign out button
+        const signOutBtn = document.getElementById('signOutBtn');
+
+        // ------------------ HELPER FUNCTIONS ------------------
+        
+        // Show Toast Notifications
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast-msg';
+            
+            // Check theme type
+            if (type === 'success') {
+                toast.style.borderColor = 'rgba(20, 184, 166, 0.3)';
+                toast.innerHTML = `
+                    <i class="fa-solid fa-circle-check toast-icon"></i>
+                    <span class="toast-text">${message}</span>
+                `;
+            } else if (type === 'info') {
+                toast.style.borderColor = 'rgba(255, 122, 91, 0.3)';
+                toast.innerHTML = `
+                    <i class="fa-solid fa-circle-info toast-icon" style="color: var(--accent-coral);"></i>
+                    <span class="toast-text">${message}</span>
+                `;
+            } else if (type === 'warning') {
+                toast.style.borderColor = 'rgba(244, 63, 94, 0.3)';
+                toast.innerHTML = `
+                    <i class="fa-solid fa-triangle-exclamation toast-icon" style="color: var(--warning);"></i>
+                    <span class="toast-text">${message}</span>
+                `;
+            }
+
+            toastContainer.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 50);
+
+            // Clear after 3.5 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 400);
+            }, 3500);
+        }
+
+        // Calculate and animate the Progress Ring
+        function updateProgressRing() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            // Update Text
+            progressPctText.textContent = `${pct}%`;
+            taskSubtextEl.textContent = `${completed} completed of ${total} tasks`;
+
+            // SVG Stroke Math
+            const radius = 52;
+            const circumference = 2 * Math.PI * radius; // Approx 326.72
+            const offset = circumference - (pct / 100) * circumference;
+            progressRingCircle.style.strokeDashoffset = offset;
+
+            // Change Description text based on percentage
+            if (pct === 100) {
+                progressLabelTitle.textContent = "Velocity: Masterful";
+                progressLabelDesc.textContent = "Outstanding! The entire cohort tasks queue is resolved. Your guidance is perfectly optimized.";
+                progressLabelTitle.style.color = "var(--success)";
+            } else if (pct >= 75) {
+                progressLabelTitle.textContent = "Velocity: Outstanding";
+                progressLabelDesc.textContent = "Great progress. The cohort is resolving milestones. Minor reviews are currently pending.";
+                progressLabelTitle.style.color = "var(--accent-teal)";
+            } else if (pct >= 40) {
+                progressLabelTitle.textContent = "Velocity: Stable";
+                progressLabelDesc.textContent = "Stable resolution rate. Midterm submission review is running. Track any blocked items.";
+                progressLabelTitle.style.color = "var(--accent-gold)";
+            } else {
+                progressLabelTitle.textContent = "Velocity: Warning State";
+                progressLabelDesc.textContent = "Low resolution rate. Multiple critical submissions are pending evaluation reviews.";
+                progressLabelTitle.style.color = "var(--warning)";
+            }
+        }
+
+        // Render Task Queue HTML
+        function renderTasks() {
+            taskListEl.innerHTML = '';
+            
+            if (tasks.length === 0) {
+                taskListEl.innerHTML = `
+                    <div style="text-align: center; padding: 2.2rem; color: var(--text-muted); font-size: 0.9rem;">
+                        <i class="fa-solid fa-list-check" style="font-size: 2rem; margin-bottom: 0.5rem; color: var(--text-dark);"></i>
+                        <p>No active tasks in evaluation queue.</p>
+                    </div>
+                `;
+                updateProgressRing();
+                return;
+            }
+
+            tasks.forEach(task => {
+                const taskCard = document.createElement('div');
+                taskCard.className = `task-card ${task.completed ? 'completed' : ''}`;
+                taskCard.dataset.id = task.id;
+
+                // Priority translation
+                const priorityLabels = {
+                    high: 'High Priority',
+                    medium: 'Medium Priority',
+                    review: 'Review Queue'
+                };
+
+                taskCard.innerHTML = `
+                    <div class="task-main">
+                        <label class="checkbox-wrapper">
+                            <input type="checkbox" class="checkbox-input task-toggle" ${task.completed ? 'checked' : ''}>
+                            <span class="checkbox-custom"></span>
+                        </label>
+                        <div class="task-details">
+                            <span class="task-title">${task.title}</span>
+                            <div class="task-meta">
+                                <span class="task-project">${task.project}</span>
+                                <span>•</span>
+                                <span class="priority-tag ${task.priority}">${priorityLabels[task.priority]}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="task-right">
+                        <img src="${assigneeAvatars[task.assignee]}" alt="${task.assignee}" class="assignee-avatar" title="Submitted by ${assigneeNames[task.assignee]}" onerror="this.src='https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=60&q=80'">
+                        <button class="delete-task-btn"><i class="fa-regular fa-trash-can"></i></button>
+                    </div>
+                `;
+
+                // Add Toggle completion listener
+                const toggle = taskCard.querySelector('.task-toggle');
+                toggle.addEventListener('change', () => {
+                    task.completed = toggle.checked;
+                    if (task.completed) {
+                        taskCard.classList.add('completed');
+                        showToast(`Task Approved: "${task.title}"`, 'success');
+                    } else {
+                        taskCard.classList.remove('completed');
+                        showToast(`Task Re-opened: "${task.title}"`, 'info');
+                    }
+                    updateProgressRing();
+                });
+
+                // Add Delete button listener
+                const deleteBtn = taskCard.querySelector('.delete-task-btn');
+                deleteBtn.addEventListener('click', () => {
+                    tasks = tasks.filter(t => t.id !== task.id);
+                    showToast(`Dismissed task: "${task.title}"`, 'warning');
+                    renderTasks();
+                });
+
+                taskListEl.appendChild(taskCard);
+            });
+
+            updateProgressRing();
+        }
+
+        // Recalculate work log values based on DOM attributes
+        function updateWeeklyHoursSum() {
+            let total = 0;
+            const cols = chartBars.querySelectorAll('.chart-bar-col');
+            cols.forEach(col => {
+                total += parseFloat(col.getAttribute('data-hours'));
+            });
+
+            total = Math.round(total * 100) / 100;
+            chartTotalHours.textContent = `Total: ${total} hrs`;
+            totalHoursVal.textContent = `${total} hrs`;
+        }
+
+        // ------------------ INITIALIZATION & EVENT LISTENERS ------------------
+
+        // Initial task load
+        renderTasks();
+
+        // 1. Navigation switching
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                
+                const section = item.getAttribute('data-section');
+                showToast(`Navigated to: ${section}`, 'info');
+
+                // Auto-close sidebar on mobile after clicking
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                    sidebarOverlay.classList.remove('active');
+                }
+            });
+        });
+
+        // Sign out visual effect
+        signOutBtn.addEventListener('click', () => {
+            showToast('Securely signing out of LaunchPad Mentor portal...', 'warning');
+            setTimeout(() => {
+                alert('Sign out simulated successfully!');
+            }, 1000);
+        });
+
+        // 2. Mobile Sidebar drawer controls
+        mobileMenuToggle.addEventListener('click', () => {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.add('active');
+        });
+
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+        });
+
+        // 3. Notification Dropdown Panel toggling
+        notificationBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notificationDropdown.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!notificationDropdown.contains(e.target) && e.target !== notificationBtn) {
+                notificationDropdown.classList.remove('show');
+            }
+        });
+
+        // Click on individual notifications to "read"
+        const notiItems = notiList.querySelectorAll('.noti-item');
+        notiItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const dot = item.querySelector('.noti-dot');
+                if (dot && !dot.classList.contains('read')) {
+                    dot.classList.add('read');
+                    showToast('Notification marked as read', 'info');
+                    
+                    // Check badge count
+                    const unread = notiList.querySelectorAll('.noti-dot:not(.read)').length;
+                    if (unread === 0) {
+                        bellBadge.style.display = 'none';
+                    }
+                }
+            });
+        });
+
+        notiClearAll.addEventListener('click', (e) => {
+            e.preventDefault();
+            const dots = notiList.querySelectorAll('.noti-dot');
+            dots.forEach(dot => dot.classList.add('read'));
+            bellBadge.style.display = 'none';
+            showToast('All notifications marked as read', 'info');
+            notificationDropdown.classList.remove('show');
+        });
+
+        // 4. Keyboard listener for Cmd/Ctrl + K (Focus Search Bar)
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                searchBar.focus();
+                showToast('Quick-search activated', 'info');
+            }
+        });
+
+        // Handle Search Box Input (filter cards visually)
+        searchBar.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const taskCards = taskListEl.querySelectorAll('.task-card');
+            
+            taskCards.forEach(card => {
+                const title = card.querySelector('.task-title').textContent.toLowerCase();
+                const project = card.querySelector('.task-project').textContent.toLowerCase();
+                if (title.includes(query) || project.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // 5. Create Brief Modal controls
+        btnCreateTask.addEventListener('click', () => {
+            taskModal.classList.add('show');
+            document.getElementById('taskNameInput').focus();
+        });
+
+        const closeModal = () => {
+            taskModal.classList.remove('show');
+            createTaskForm.reset();
+        };
+
+        modalClose.addEventListener('click', closeModal);
+        modalCancel.addEventListener('click', closeModal);
+        taskModal.addEventListener('click', (e) => {
+            if (e.target === taskModal) closeModal();
+        });
+
+        // Form submission for adding tasks
+        createTaskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('taskNameInput').value.trim();
+            const project = document.getElementById('taskProjectInput').value.trim();
+            const priority = document.getElementById('taskPriorityInput').value;
+            const assignee = document.getElementById('taskAssigneeInput').value;
+
+            if (!name || !project) return;
+
+            const newTask = {
+                id: Date.now(),
+                title: name,
+                project: project,
+                priority: priority,
+                completed: false,
+                assignee: assignee
+            };
+
+            tasks.push(newTask);
+            showToast(`Assigned Task: "${name}" to ${project}`, 'success');
+            renderTasks();
+            closeModal();
+        });
+
+        // 6. Interactive Hourly Work Log Chart clicking logic
+        const cols = chartBars.querySelectorAll('.chart-bar-col');
+        cols.forEach(col => {
+            col.addEventListener('click', () => {
+                const day = col.getAttribute('data-day');
+                const currentHours = parseFloat(col.getAttribute('data-hours'));
+                
+                // Prompt user for new hours
+                const input = prompt(`Enter mentoring hours logged for ${day}:`, currentHours);
+                
+                if (input === null) return; // User cancelled
+                
+                const newHours = parseFloat(input);
+                if (isNaN(newHours) || newHours < 0 || newHours > 24) {
+                    showToast('Please enter a valid number of hours (0 - 24)', 'warning');
+                    return;
+                }
+
+                // Update hours attribute
+                col.setAttribute('data-hours', newHours);
+                
+                // Animate Height (Max height scale of 100% relative to 8 hours)
+                const heightPct = Math.min((newHours / 8) * 100, 100);
+                col.querySelector('.chart-bar-fill').style.height = `${heightPct}%`;
+                
+                // Update Tooltip text
+                col.querySelector('.chart-tooltip').textContent = `${day}: ${newHours}h`;
+                
+                // Trigger details recalculation
+                updateWeeklyHoursSum();
+                
+                // Update specific stat panel detail text
+                hoursDayVal.textContent = `${newHours}h logged on ${day}`;
+                
+                showToast(`Logged ${newHours} mentoring hours for ${day}!`, 'success');
+            });
+        });
+
+        // 7. Interactive Streak Tracker Clicking
+        const streakNodes = streakDaysRow.querySelectorAll('.streak-day-node');
+        streakNodes.forEach(node => {
+            node.addEventListener('click', () => {
+                node.classList.toggle('active');
+                
+                // Update check icon inside bubble
+                const bubble = node.querySelector('.streak-bubble');
+                const label = node.getAttribute('data-day');
+                
+                if (node.classList.contains('active')) {
+                    bubble.innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else {
+                    // Revert to letter
+                    bubble.innerHTML = label.substring(0, 1);
+                }
+
+                // Count active streak nodes
+                const activeCount = streakDaysRow.querySelectorAll('.streak-day-node.active').length;
+                streakCountVal.innerHTML = `<i class="fa-solid fa-fire"></i> ${activeCount} Days Mentor Activity`;
+                
+                showToast(`Toggled feedback review log for ${label}`, 'info');
+            });
+        });
+
+    </script>
+</body>
+</html>
