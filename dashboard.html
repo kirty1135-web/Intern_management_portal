@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LaunchPad | Intern Management Hub</title>
+    <title>InternVerse | Intern Management Hub</title>
     <!-- Fonts: Lora (Serif) & Plus Jakarta Sans (Sans-serif) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +11,6 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ------------------ DESIGN SYSTEM & CONFIG ------------------ */
         :root {
             --bg-dark: #050c0e;
             --glass-card: rgba(10, 25, 30, 0.6);
@@ -19,7 +18,6 @@
             --glass-border-hover: rgba(255, 255, 255, 0.15);
             --glass-border-focus: rgba(20, 184, 166, 0.3);
             
-            /* Accents - Premium Deep Teal + Coral + Amber Gold */
             --accent-teal: #14b8a6;
             --accent-teal-rgb: 20, 184, 166;
             --accent-coral: #ff7a5b;
@@ -27,24 +25,19 @@
             --accent-gold: #fbbf24;
             --accent-gold-rgb: 251, 191, 36;
             
-            /* Text States */
             --text-primary: #f1f7f6;
             --text-muted: #8fa8a8;
             --text-dark: #4b6b6c;
             
-            /* Semantic Colors */
             --success: #10b981;
             --warning: #f43f5e;
             
-            /* Typography */
             --font-display: 'Lora', serif;
             --font-sans: 'Plus Jakarta Sans', sans-serif;
             
-            /* Transitions */
             --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* ------------------ BASE STYLES ------------------ */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -53,7 +46,6 @@
             scrollbar-color: rgba(20, 184, 166, 0.15) transparent;
         }
 
-        /* Custom Scrollbars */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -78,7 +70,6 @@
             position: relative;
         }
 
-        /* ------------------ AMBIENT GLOW SYSTEM ------------------ */
         .ambient-glows {
             position: absolute;
             top: 0;
@@ -133,7 +124,6 @@
             }
         }
 
-        /* ------------------ LAYOUT WRAPPER ------------------ */
         .app-container {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -142,7 +132,6 @@
             z-index: 10;
         }
 
-        /* ------------------ LEFT SIDEBAR ------------------ */
         aside.sidebar {
             background: rgba(8, 20, 24, 0.5);
             backdrop-filter: blur(25px);
@@ -1712,7 +1701,7 @@
                     <span class="status-dot"></span>
                 </div>
                 <div class="profile-info">
-                    <span class="profile-name">Sarah Jenkins</span>
+                    <span class="profile-name">Kirty Goswami</span>
                     <span class="profile-role">Cohort Lead / Mentor</span>
                 </div>
             </div>
@@ -2503,11 +2492,11 @@
             });
         });
 
-        // Sign out visual effect
+        // Sign out visual effect - Redirects back to index.html
         signOutBtn.addEventListener('click', () => {
             showToast('Securely signing out of LaunchPad Mentor portal...', 'warning');
             setTimeout(() => {
-                alert('Sign out simulated successfully!');
+                window.location.href = 'index.html';
             }, 1000);
         });
 

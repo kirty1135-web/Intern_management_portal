@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login & Register | Professional Dark Theme</title>
+    <title>Login & Register | LaunchPad</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,58 +13,108 @@
         <div class="shape"></div>
         <div class="shape"></div>
     </div>
-    <div class="container">
+
+    <!-- Flash message toast -->
+    <div id="flashToast" class="flash-toast"></div>
+
+    <div class="container" id="container">
+        <!-- Sign In Form -->
         <div class="form-container sign-in-container">
-            <form action="#">
-                <h1>Sign in</h1>
+            <form id="signInForm" novalidate>
+                <h1>Login</h1>
+
+                <div class="role-toggle" id="signInRoleToggle">
+                    <button type="button" class="role-btn active" data-role="intern">
+                        <i class="fa-solid fa-user-graduate"></i> Intern
+                    </button>
+                    <button type="button" class="role-btn" data-role="mentor">
+                        <i class="fa-solid fa-user-tie"></i> Mentor
+                    </button>
+                </div>
+
                 <div class="social-container">
-                    <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="social"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" class="social"><i class="fab fa-google"></i></a>
-                    <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" class="social"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="social social-fb" data-network="Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" class="social social-google" data-network="Google">
+                        <i class="fab fa-google"></i>
+                    </a>
+                    <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" class="social social-linkedin" data-network="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
                 </div>
                 <span>or use your account</span>
                 <div class="input-group">
-                    <input type="email" placeholder="Email" />
+                    <input type="email" id="signInEmail" placeholder="Email" autocomplete="email" />
                     <span class="focus-border"></span>
+                    <span id="signInEmailError" class="error-message"></span>
                 </div>
                 <div class="input-group">
-                    <input type="password" placeholder="Password" />
+                    <input type="password" id="signInPassword" placeholder="Password" autocomplete="current-password" />
                     <span class="focus-border"></span>
+                    <span id="signInPasswordError" class="error-message"></span>
                 </div>
-                <a href="#">Forgot your password?</a>
-                <button>Sign In</button>
+                <a href="#" id="forgotPasswordLink">Forgot your password?</a>
+                <button type="submit" id="signInSubmit">LogIn</button>
+                <div id="signInSuccess" class="form-success"></div>
+                <a href="#" class="mobile-switch" id="mobileGoSignUp">Don't have an account? Sign Up</a>
             </form>
         </div>
+
+        <!-- Sign Up Form -->
         <div class="form-container sign-up-container">
-            <form action="#">
+            <form id="signUpForm" novalidate>
                 <h1>Create Account</h1>
+
+                <div class="role-toggle" id="signUpRoleToggle">
+                    <button type="button" class="role-btn active" data-role="intern">
+                        <i class="fa-solid fa-user-graduate"></i> Intern
+                    </button>
+                    <button type="button" class="role-btn" data-role="mentor">
+                        <i class="fa-solid fa-user-tie"></i> Mentor
+                    </button>
+                </div>
+
                 <div class="social-container">
-                    <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="social"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" class="social"><i class="fab fa-google"></i></a>
-                    <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" class="social"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="social social-fb" data-network="Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" class="social social-google" data-network="Google">
+                        <i class="fab fa-google"></i>
+                    </a>
+                    <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" class="social social-linkedin" data-network="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
                 </div>
                 <span>or use your email for registration</span>
                 <div class="input-group">
-                    <input type="text" placeholder="Name" />
+                    <input type="text" id="signUpName" placeholder="Name" autocomplete="name" />
                     <span class="focus-border"></span>
+                    <span id="signUpNameError" class="error-message"></span>
                 </div>
                 <div class="input-group">
-                    <input type="email" placeholder="Email" />
+                    <input type="email" id="signUpEmail" placeholder="Email" autocomplete="email" />
                     <span class="focus-border"></span>
+                    <span id="signUpEmailError" class="error-message"></span>
                 </div>
                 <div class="input-group">
-                    <input type="password" placeholder="Password" />
+                    <input type="password" id="signUpPassword" placeholder="Password" autocomplete="new-password" />
                     <span class="focus-border"></span>
+                    <span id="signUpPasswordError" class="error-message"></span>
                 </div>
-                <button>Sign Up</button>
+                <button type="submit" id="signUpSubmit">Sign Up</button>
+                <div id="signUpSuccess" class="form-success"></div>
+                <a href="#" class="mobile-switch" id="mobileGoSignIn">Already have an account? Log In</a>
             </form>
         </div>
+
+        <!-- Slide Panels -->
         <div class="overlay-container">
             <div class="overlay">
                 <div class="overlay-panel overlay-left">
                     <h1>Welcome Back!</h1>
                     <p>To keep connected with us please login with your personal info</p>
-                    <button class="ghost" id="signIn">Sign In</button>
+                    <button class="ghost" id="signIn">LogIn</button>
                 </div>
                 <div class="overlay-panel overlay-right">
                     <h1>Hello!</h1>
