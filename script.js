@@ -1,4 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Check if user is already authenticated
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+        // Immediately redirect to dashboard
+        window.location.replace('dashboard.html');
+        return;
+    }
+
+    // Trigger page fade-in
+    document.body.classList.add('loaded');
+
+    // DOM Elements
     const container = document.getElementById('container');
     const signInBtn = document.getElementById('signIn');
     const signUpBtn = document.getElementById('signUp');
@@ -13,14 +25,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const signInEmailError = document.getElementById('signInEmailError');
     const signInPasswordError = document.getElementById('signInPasswordError');
     const signInSuccess = document.getElementById('signInSuccess');
+    const signInSubmit = document.getElementById('signInSubmit');
 
     const signUpName = document.getElementById('signUpName');
     const signUpEmail = document.getElementById('signUpEmail');
     const signUpPassword = document.getElementById('signUpPassword');
+    const signUpConfirmPassword = document.getElementById('signUpConfirmPassword');
     const signUpNameError = document.getElementById('signUpNameError');
     const signUpEmailError = document.getElementById('signUpEmailError');
     const signUpPasswordError = document.getElementById('signUpPasswordError');
+    const signUpConfirmPasswordError = document.getElementById('signUpConfirmPasswordError');
     const signUpSuccess = document.getElementById('signUpSuccess');
+    const signUpSubmit = document.getElementById('signUpSubmit');
 
     const flashToast = document.getElementById('flashToast');
 
@@ -46,6 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return getUsers().find(u => u.email.toLowerCase() === email.toLowerCase());
     }
 
+    // Seed default mentor user if database is empty
+    if (getUsers().length === 0) {
+        saveUsers([
+            { name: 'Kirty Goswami', email: 'kirty@internverse.com', password: 'password123', role: 'mentor' }
+        ]);
+    }
+
     /* ---------- Flash toast ---------- */
     function showFlash(message, type) {
         clearTimeout(flashTimer);
@@ -67,19 +90,32 @@ document.addEventListener('DOMContentLoaded', () => {
         clearErrors();
     }
 
-    signUpBtn.addEventListener('click', goToSignUp);
-    signInBtn.addEventListener('click', goToSignIn);
-    mobileGoSignUp.addEventListener('click', (e) => { e.preventDefault(); goToSignUp(); });
-    mobileGoSignIn.addEventListener('click', (e) => { e.preventDefault(); goToSignIn(); });
+    signUpBtn.addEventListener('click', () => { window.location.hash = 'signup'; });
+    signInBtn.addEventListener('click', () => { window.location.hash = 'login'; });
+    mobileGoSignUp.addEventListener('click', (e) => { e.preventDefault(); window.location.hash = 'signup'; });
+    mobileGoSignIn.addEventListener('click', (e) => { e.preventDefault(); window.location.hash = 'login'; });
 
     function clearErrors() {
-        [signInEmailError, signInPasswordError, signUpNameError, signUpEmailError, signUpPasswordError]
-            .forEach(el => el.textContent = '');
-        [signInEmail, signInPassword, signUpName, signUpEmail, signUpPassword]
-            .forEach(el => el.classList.remove('invalid'));
+        [signInEmailError, signInPasswordError, signUpNameError, signUpEmailError, signUpPasswordError, signUpConfirmPasswordError]
+            .forEach(el => { if (el) el.textContent = ''; });
+        [signInEmail, signInPassword, signUpName, signUpEmail, signUpPassword, signUpConfirmPassword]
+            .forEach(el => { if (el) el.classList.remove('invalid'); });
         signInSuccess.textContent = '';
         signUpSuccess.textContent = '';
     }
+
+    /* ---------- Hash Router for Login/Signup toggles ---------- */
+    function handleHashRoute() {
+        if (window.location.hash === '#signup') {
+            goToSignUp();
+        } else {
+            goToSignIn();
+        }
+    }
+
+    // Initialize hash routing checks
+    handleHashRoute();
+    window.addEventListener('hashchange', handleHashRoute);
 
     /* ---------- Role toggles ---------- */
     function setupRoleToggle(toggleEl, onSelect) {
@@ -123,15 +159,39 @@ document.addEventListener('DOMContentLoaded', () => {
         errorEl.textContent = '';
     }
 
+    /* ---------- Loading & Transition state ---------- */
+    function showLoading(button, isLoading) {
+        if (isLoading) {
+            button.classList.add('btn-loading');
+            button.disabled = true;
+        } else {
+            button.classList.remove('btn-loading');
+            button.disabled = false;
+        }
+    }
+
+    function redirectWithTransition(url) {
+        document.body.classList.remove('loaded');
+        document.body.classList.add('fade-out');
+        setTimeout(() => {
+            window.location.href = url;
+        }, 400);
+    }
+
     /* ---------- Sign Up ---------- */
     signUpForm.addEventListener('submit', (e) => {
         e.preventDefault();
+
+        // Prevent double submit
+        if (signUpSubmit.classList.contains('btn-loading')) return;
+
         clearErrors();
         let valid = true;
 
         const name = signUpName.value.trim();
         const email = signUpEmail.value.trim();
         const password = signUpPassword.value;
+        const confirmPassword = signUpConfirmPassword.value;
 
         if (name.length < 2) {
             markInvalid(signUpName, signUpNameError, 'Please enter your full name.');
@@ -154,6 +214,16 @@ document.addEventListener('DOMContentLoaded', () => {
             markValid(signUpPassword, signUpPasswordError);
         }
 
+        if (confirmPassword.length === 0) {
+            markInvalid(signUpConfirmPassword, signUpConfirmPasswordError, 'Please confirm your password.');
+            valid = false;
+        } else if (password !== confirmPassword) {
+            markInvalid(signUpConfirmPassword, signUpConfirmPasswordError, 'Passwords do not match.');
+            valid = false;
+        } else {
+            markValid(signUpConfirmPassword, signUpConfirmPasswordError);
+        }
+
         if (!valid) return;
 
         if (findUser(email)) {
@@ -162,23 +232,34 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Save new user in mock backend database
         const users = getUsers();
-        users.push({ name, email, password, role: selectedSignUpRole });
+        const newUser = { name, email, password, role: selectedSignUpRole };
+        users.push(newUser);
         saveUsers(users);
 
-        signUpSuccess.textContent = `Account created as ${selectedSignUpRole}. You can now sign in.`;
-        showFlash('Registration successful! Please sign in.', 'success');
-        signUpForm.reset();
+        // UI state transitions
+        showLoading(signUpSubmit, true);
+        signUpSuccess.textContent = `Account created successfully!`;
+        showFlash('Account Created Successfully!', 'success');
+
+        // Automate login session setting
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
 
         setTimeout(() => {
-            goToSignIn();
-            signInEmail.value = email;
-        }, 1100);
+            signUpForm.reset();
+            showLoading(signUpSubmit, false);
+            redirectWithTransition('dashboard.html');
+        }, 1200);
     });
 
     /* ---------- Sign In ---------- */
     signInForm.addEventListener('submit', (e) => {
         e.preventDefault();
+
+        // Prevent double submit
+        if (signInSubmit.classList.contains('btn-loading')) return;
+
         clearErrors();
         let valid = true;
 
@@ -204,11 +285,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = findUser(email);
 
         if (!user) {
-            // Not registered yet -- ask them to sign up first
             markInvalid(signInEmail, signInEmailError, 'No account found with this email.');
             showFlash('You need to sign up first before you can log in!', 'error');
             setTimeout(() => {
-                goToSignUp();
+                window.location.hash = 'signup';
                 signUpEmail.value = email;
             }, 1000);
             return;
@@ -220,13 +300,103 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Adjust role dynamically or warn (we allow the login but match the role stored)
         if (user.role !== selectedSignInRole) {
-            showFlash(`This account is registered as ${user.role}, not ${selectedSignInRole}. Signing you in as ${user.role}.`, 'error');
+            showFlash(`Welcome back, cohort ${user.role}!`, 'success');
         } else {
-            showFlash(`Welcome back, ${user.name}!`, 'success');
+            showFlash('Login Successful!', 'success');
         }
 
-        signInSuccess.textContent = `Signed in as ${user.name} (${user.role}).`;
-        signInForm.reset();
+        // UI transitions
+        showLoading(signInSubmit, true);
+        signInSuccess.textContent = `Login Successful!`;
+
+        // Save login session
+        localStorage.setItem('currentUser', JSON.stringify(user));
+
+        setTimeout(() => {
+            signInForm.reset();
+            showLoading(signInSubmit, false);
+            redirectWithTransition('dashboard.html');
+        }, 1000);
     });
+
+    /* ---------- Forgot Password Custom Modal Flow ---------- */
+    const forgotModal = document.getElementById('forgotModal');
+    const forgotCancel = document.getElementById('forgotCancel');
+    const forgotSubmit = document.getElementById('forgotSubmit');
+    const forgotEmail = document.getElementById('forgotEmail');
+    const forgotNewPassword = document.getElementById('forgotNewPassword');
+    const forgotNewPasswordGroup = document.getElementById('forgotNewPasswordGroup');
+    const forgotEmailError = document.getElementById('forgotEmailError');
+    const forgotNewPasswordError = document.getElementById('forgotNewPasswordError');
+
+    let recoveryUser = null;
+
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            forgotModal.classList.add('show');
+            forgotEmail.value = '';
+            forgotNewPassword.value = '';
+            forgotNewPasswordGroup.style.display = 'none';
+            forgotEmail.disabled = false;
+            forgotSubmit.textContent = 'Verify Email';
+            if (forgotEmailError) forgotEmailError.textContent = '';
+            if (forgotNewPasswordError) forgotNewPasswordError.textContent = '';
+            recoveryUser = null;
+        });
+    }
+
+    if (forgotCancel) {
+        forgotCancel.addEventListener('click', () => {
+            forgotModal.classList.remove('show');
+        });
+    }
+
+    if (forgotSubmit) {
+        forgotSubmit.addEventListener('click', () => {
+            if (!recoveryUser) {
+                // Email Verification Step
+                const email = forgotEmail.value.trim();
+                if (!isValidEmail(email)) {
+                    if (forgotEmailError) forgotEmailError.textContent = 'Please enter a valid email address.';
+                    forgotEmail.classList.add('invalid');
+                    return;
+                }
+                
+                const user = findUser(email);
+                if (!user) {
+                    if (forgotEmailError) forgotEmailError.textContent = 'No account found with this email.';
+                    forgotEmail.classList.add('invalid');
+                    return;
+                }
+
+                // Email is verified! Move to password input step
+                recoveryUser = user;
+                if (forgotEmailError) forgotEmailError.textContent = '';
+                forgotEmail.classList.remove('invalid');
+                forgotEmail.disabled = true;
+                forgotNewPasswordGroup.style.display = 'block';
+                forgotSubmit.textContent = 'Update Password';
+            } else {
+                // Password Update Step
+                const newPassword = forgotNewPassword.value;
+                if (newPassword.length < 6) {
+                    if (forgotNewPasswordError) forgotNewPasswordError.textContent = 'Password must be at least 6 characters.';
+                    forgotNewPassword.classList.add('invalid');
+                    return;
+                }
+
+                const users = getUsers();
+                const dbUser = users.find(u => u.email.toLowerCase() === recoveryUser.email.toLowerCase());
+                if (dbUser) {
+                    dbUser.password = newPassword;
+                    saveUsers(users);
+                    showFlash('Password updated successfully! You can now log in.', 'success');
+                    forgotModal.classList.remove('show');
+                }
+            }
+        });
+    }
 });

@@ -102,6 +102,11 @@
                     <span class="focus-border"></span>
                     <span id="signUpPasswordError" class="error-message"></span>
                 </div>
+                <div class="input-group">
+                    <input type="password" id="signUpConfirmPassword" placeholder="Confirm Password" autocomplete="new-password" />
+                    <span class="focus-border"></span>
+                    <span id="signUpConfirmPasswordError" class="error-message"></span>
+                </div>
                 <button type="submit" id="signUpSubmit">Sign Up</button>
                 <div id="signUpSuccess" class="form-success"></div>
                 <a href="#" class="mobile-switch" id="mobileGoSignIn">Already have an account? Log In</a>
@@ -122,8 +127,30 @@
                     <button class="ghost" id="signUp">Sign Up</button>
                 </div>
             </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="forgot-modal" id="forgotModal">
+        <div class="forgot-modal-box">
+            <h2>Recover Password</h2>
+            <p>Enter your email address to verify your account and set a new password.</p>
+            <div class="input-group">
+                <input type="email" id="forgotEmail" placeholder="Email" autocomplete="email" />
+                <span class="focus-border"></span>
+                <span id="forgotEmailError" class="error-message"></span>
+            </div>
+            <div class="input-group" id="forgotNewPasswordGroup" style="display: none;">
+                <input type="password" id="forgotNewPassword" placeholder="New Password" autocomplete="new-password" />
+                <span class="focus-border"></span>
+                <span id="forgotNewPasswordError" class="error-message"></span>
+            </div>
+            <div class="forgot-modal-actions">
+                <button type="button" class="btn-cancel" id="forgotCancel">Cancel</button>
+                <button type="button" id="forgotSubmit">Verify Email</button>
+            </div>
         </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>

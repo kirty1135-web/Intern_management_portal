@@ -1,28 +1,28 @@
 
 /* ====== Design tokens ====== */
 :root {
-    --bg-deep: #12141c;
-    --bg-deep-2: #191c27;
-    --panel-glass: rgba(255, 255, 255, 0.045);
-    --panel-glass-strong: rgba(255, 255, 255, 0.07);
-    --border-glass: rgba(255, 255, 255, 0.09);
-    --text-main: #e7e9ee;
-    --text-muted: #9aa1b2;
-    --text-faint: #6e7488;
-    --accent: #6c7fa8;        /* muted slate blue */
-    --accent-soft: #8593b8;
-    --accent-dim: rgba(108, 127, 168, 0.18);
-    --success: #7ea88a;       /* muted sage green */
-    --success-bg: rgba(126, 168, 138, 0.12);
-    --error: #c07575;         /* muted clay red */
-    --error-bg: rgba(192, 117, 117, 0.1);
-    --overlay-start: #3a4566;   /* muted indigo-navy */
-    --overlay-mid: #4a5a7a;     /* soft steel blue, the accent moment */
-    --overlay-end: #232a3f;    /* deep navy, ties back to bg */
+    --bg-deep: #0F172A;
+    --bg-deep-2: #1E293B;
+    --panel-glass: rgba(30, 41, 59, 0.7);
+    --panel-glass-strong: rgba(30, 41, 59, 0.95);
+    --border-glass: rgba(255, 255, 255, 0.08);
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --text-faint: #475569;
+    --accent: #3B82F6;        /* professional blue */
+    --accent-soft: #60A5FA;
+    --accent-dim: rgba(59, 130, 246, 0.15);
+    --success: #22C55E;       /* green-500 */
+    --success-bg: rgba(34, 197, 94, 0.1);
+    --error: #EF4444;         /* red-500 */
+    --error-bg: rgba(239, 68, 68, 0.1);
+    --overlay-start: #1E293B;
+    --overlay-mid: #334155;
+    --overlay-end: #0F172A;
     --radius-lg: 18px;
     --radius-md: 12px;
     --radius-sm: 8px;
-    --shadow-panel: 0 20px 60px rgba(0, 0, 0, 0.45);
+    --shadow-panel: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
  
 * {
@@ -40,6 +40,16 @@ body {
     color: var(--text-main);
     overflow: hidden;
     position: relative;
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+body.loaded {
+    opacity: 1;
+}
+
+body.fade-out {
+    opacity: 0;
 }
  
 /* ====== Ambient background ====== */
@@ -514,4 +524,121 @@ form button[type="submit"]:active {
         display: inline-block;
         margin-top: 6px;
     }
+}
+
+/* ====== Button Loading Spinner ====== */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    top: 50%;
+    left: 50%;
+    margin-top: -9px;
+    margin-left: -9px;
+    border: 2px solid transparent;
+    border-top-color: var(--text-main);
+    border-right-color: var(--text-main);
+    border-radius: 50%;
+    animation: button-spin 0.6s linear infinite;
+}
+
+@keyframes button-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ====== Forgot Password Recovery Modal ====== */
+.forgot-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.forgot-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.forgot-modal-box {
+    background: var(--panel-glass-strong);
+    border: 1px solid var(--border-glass);
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: var(--shadow-panel);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.forgot-modal.show .forgot-modal-box {
+    transform: scale(1);
+}
+
+.forgot-modal-box h2 {
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text-main);
+}
+
+.forgot-modal-box p {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.forgot-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.forgot-modal-actions button {
+    border-radius: 999px;
+    padding: 10px 24px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    border: 1px solid var(--accent);
+}
+
+.forgot-modal-actions button#forgotSubmit {
+    background: var(--accent-dim);
+    color: var(--text-main);
+}
+
+.forgot-modal-actions button#forgotSubmit:hover {
+    background: rgba(59, 130, 246, 0.32);
+}
+
+.forgot-modal-actions button.btn-cancel {
+    background: transparent;
+    border-color: var(--border-glass);
+    color: var(--text-main);
+}
+
+.forgot-modal-actions button.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
