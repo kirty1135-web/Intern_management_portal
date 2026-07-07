@@ -2,8 +2,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if user is already authenticated
     const currentUser = localStorage.getItem('currentUser');
     if (currentUser) {
-        // Immediately redirect to dashboard
-        window.location.replace('dashboard.html');
+        // Immediately redirect to appropriate dashboard
+        try {
+            const userObj = JSON.parse(currentUser);
+            if (userObj.role === 'mentor') {
+                window.location.replace('mentor_dashboard.html');
+            } else {
+                window.location.replace('intern_dashboard.html');
+            }
+        } catch (e) {
+            localStorage.removeItem('currentUser');
+        }
         return;
     }
 
@@ -250,7 +259,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             signUpForm.reset();
             showLoading(signUpSubmit, false);
-            redirectWithTransition('dashboard.html');
+            if (selectedSignUpRole === 'mentor') {
+                redirectWithTransition('mentor_dashboard.html');
+            } else {
+                redirectWithTransition('intern_dashboard.html');
+            }
         }, 1200);
     });
 
@@ -318,7 +331,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             signInForm.reset();
             showLoading(signInSubmit, false);
-            redirectWithTransition('dashboard.html');
+            if (user.role === 'mentor') {
+                redirectWithTransition('mentor_dashboard.html');
+            } else {
+                redirectWithTransition('intern_dashboard.html');
+            }
         }, 1000);
     });
 

@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Synchronous Role Guard for Intern Dashboard
+        (function() {
+            const u = localStorage.getItem('currentUser');
+            if (!u) {
+                window.location.replace('index.html');
+            } else {
+                try {
+                    const userObj = JSON.parse(u);
+                    if (userObj.role !== 'intern') {
+                        window.location.replace('mentor_dashboard.html');
+                    }
+                } catch(e) {
+                    localStorage.removeItem('currentUser');
+                    window.location.replace('index.html');
+                }
+            }
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intern Workspace | InternVerse</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Theme Color Tokens */
+            --bg-base: #0B0F19;           /* Soft deep navy background */
+            --bg-surface: #111827;        /* Surface slate */
+            --bg-surface-elevated: #1F2937; /* Elevated card slate */
+            --accent-blue: #3B82F6;       /* Clean professional blue */
+            --accent-blue-hover: #2563EB;
+            --success-green: #10B981;
+            --warning-amber: #F59E0B;
+            --danger-red: #EF4444;
+            --text-light: #F9FAFB;
+            --text-muted: #9CA3AF;
+            --border-slate: rgba(255, 255, 255, 0.06);
+            --radius-xl: 14px;
+            --radius-lg: 10px;
+            --radius-md: 8px;
+            --radius-sm: 4px;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-premium: 0 10px 25px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Deep Navy Theme override */
+        [data-theme="navy"] {
+            --bg-base: #070A14;
+            --bg-surface: #0E162B;
+            --bg-surface-elevated: #182343;
+            --border-slate: rgba(255, 255, 255, 0.05);
+            --accent-blue: #60A5FA;
+            --accent-blue-hover: #3B82F6;
+            --text-light: #F1F5F9;
+            --text-muted: #94A3B8;
+        }
+
+        /* Charcoal Theme override */
+        [data-theme="charcoal"] {
+            --bg-base: #121212;
+            --bg-surface: #1E1E1E;
+            --bg-surface-elevated: #2D2D2D;
+            --border-slate: rgba(255, 255, 255, 0.07);
+            --text-light: #E0E0E0;
+            --text-muted: #A0A0A0;
+        }
+
+        /* Reset and Hiding Scrollbars */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        *::-webkit-scrollbar {
+            display: none;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+            height: 100%;
+            background-color: var(--bg-base);
+            color: var(--text-light);
+        }
+
+        .portal-container {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigation Drawer */
+        .sidebar {
+            background-color: var(--bg-surface);
+            border-right: 1px solid var(--border-slate);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            z-index: 100;
+        }
+
+        .brand-section {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            gap: 0.8rem;
+            border-bottom: 1px solid var(--border-slate);
+            flex-shrink: 0;
+        }
+
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--accent-blue);
+            border-radius: var(--radius-md);
+        }
+
+        .brand-logo svg {
+            width: 18px;
+            height: 18px;
+            fill: #ffffff;
+        }
+
+        .brand-name {
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-light);
+        }
+
+        /* Profile details */
+        .profile-mini-card {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-slate);
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            background-color: rgba(255, 255, 255, 0.01);
+            flex-shrink: 0;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px solid var(--border-slate);
+            flex-shrink: 0;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .online-dot {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--success-green);
+            border: 2px solid var(--bg-surface);
+        }
+
+        .profile-details {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .profile-fullname {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-role-badge {
+            font-size: 0.72rem;
+            color: var(--accent-blue);
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        .sidebar-menu-wrapper {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            padding: 1.5rem 1rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .menu-item i {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            color: var(--text-light);
+            background-color: var(--bg-surface-elevated);
+        }
+
+        .menu-item.active {
+            border-left: 3px solid var(--accent-blue);
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            background-color: rgba(59, 130, 246, 0.05);
+            color: var(--text-light);
+        }
+
+        .sidebar-footer {
+            flex: 0 0 auto;
+            padding: 1.25rem 1rem;
+            border-top: 1px solid var(--border-slate);
+            background-color: var(--bg-surface);
+        }
+
+        .logout-btn {
+            color: #F87171 !important;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(239, 68, 68, 0.08) !important;
+            color: #EF4444 !important;
+        }
+
+        /* Workspace main area */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header-bar {
+            height: 70px;
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-slate);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            flex-shrink: 0;
+        }
+
+        .mobile-hamburger {
+            display: none;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .global-search-input {
+            width: 100%;
+            background-color: var(--bg-base);
+            border: 1px solid var(--border-slate);
+            border-radius: var(--radius-md);
+            padding: 10px 14px 10px 38px;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .global-search-input:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            position: relative;
+        }
+
+        .bell-icon-wrapper {
+            position: relative;
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: var(--text-muted);
+        }
+
+        .bell-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--danger-red);
+            border: 2px solid var(--bg-surface);
+            display: none;
+        }
+
+        .avatar-header-dropdown {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid var(--border-slate);
+            overflow: hidden;
+        }
+
+        .header-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .dropdown-menu-list {
+            position: absolute;
+            top: 48px;
+            right: 0;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-slate);
+            border-radius: var(--radius-lg);
+            width: 220px;
+            box-shadow: var(--shadow-premium);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 120;
+        }
+
+        .dropdown-menu-list.show {
+            display: flex;
+        }
+
+        .dropdown-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-slate);
+            background-color: rgba(255, 255, 255, 0.015);
+        }
+
+        .dropdown-link {
+            padding: 0.8rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+        }
+
+        .dropdown-link:hover {
+            background-color: var(--bg-surface-elevated);
+            color: var(--text-light);
+        }
+
+        /* Routing views */
+        .views-root-layout {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            padding: 2.25rem 2rem;
+        }
+
+        .content-view-panel {
+            display: none;
+            flex-direction: column;
+            gap: 2.25rem;
+            animation: viewFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .content-view-panel.active {
+            display: flex;
+        }
+
+        @keyframes viewFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .view-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-slate);
+            padding-bottom: 1.25rem;
+        }
+
+        .view-section-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .view-section-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Welcome Banner */
+        .welcome-hero-banner {
+            background: linear-gradient(135deg, #111827 0%, #0F172A 100%);
+            border: 1px solid var(--border-slate);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-left { max-width: 65%; }
+
+        .welcome-tag {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-blue);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .welcome-h1 {
+            font-size: 1.65rem;
+            font-weight: 800;
+            letter-spacing: -0.6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-h1 span { color: var(--accent-blue); }
+        .welcome-sub { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; }
+
+        .clock-widget {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: right;
+            border-left: 1px solid var(--border-slate);
+            padding-left: 2rem;
+        }
+
+        .clock-time { font-size: 1.45rem; font-weight: 800; }
+        .clock-date { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* Card panels */
+        .metrics-grid-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-slate);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: var(--transition-smooth);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .metric-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .metric-icon-box {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-md);
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-slate);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-blue);
+        }
+
+        .metric-number { font-size: 1.85rem; font-weight: 800; }
+
+        .metric-footer {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Bento grids */
+        .bento-dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .bento-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .dashboard-widget-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-slate);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .widget-title { font-size: 1rem; font-weight: 800; }
+        .widget-subtitle { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* Punch Clock Console */
+        .attendance-quick-widget {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-slate);
+            border-radius: var(--radius-xl);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .attendance-q-title { font-size: 0.9rem; font-weight: 700; }
+        .attendance-q-status { font-size: 0.75rem; font-weight: 600; }
+        .attendance-q-status.in span { color: var(--success-green); }
+        .attendance-q-status.out span { color: var(--danger-red); }
+
+        .btn-check-in-out {
+            border: none;
+            background-color: var(--accent-blue);
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-check-in-out:hover { background-color: var(--accent-blue-hover); }
+        .btn-check-in-out.checked-in { background-color: var(--danger-red); }
+
+        .clock-logs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        .clock-log-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0.8rem;
+            background-color: rgba(255, 255, 255, 0.015);
+            border: 1px solid var(--border-slate);
+            border-radius: var(--radius-md);
+            font-size: 0.78rem;
+        }
+
+        /* Tables & Lists */
+        .table-container-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-slate);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+        }
+
+        .portal-data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .portal-data-table th {
+            padding: 1rem 1.5rem;
+            background-color: rgba(255, 255, 255, 0.015);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-slate);
+        }
+
+        .portal-data-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-slate);
+            font-size: 0.82rem;
+        }
+
+        .portal-data-table tr:last-child td { border-bottom: none; }
+        .portal-data-table tr:hover td { background-color: rgba(255,255,255,0.005); }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-badge.active { background-color: rgba(16, 185, 129, 0.12); color: var(--success-green); }
+        .status-badge.pending { background-color: rgba(245, 158, 11, 0.12); color: var(--warning-amber); }
+        .status-badge.danger { background-color: rgba(239, 68, 68, 0.12); color: var(--danger-red); }
+        .status-badge.info { background-color: rgba(59, 130, 246, 0.12); color: var(--accent-blue); }
+
+        /* Action triggers */
+        .row-action-btn {
+            border: 1px solid var(--border-slate);
+            background-color: var(--bg-surface-elevated);
+            color: var(--text-light);
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .row-action-btn:hover { background-color: var(--accent-blue); border-color: var(--accent-blue); }
+
+        .btn-view-primary {
+            border: none;
+            background-color: var(--accent-blue);
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-view-primary:hover { background-color: var(--accent-blue-hover); }
+
+        .btn-modal-cancel {
+            background-color: transparent;
+            border: 1px solid var(--border-slate);
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+        }
+
+        .btn-modal-cancel:hover { background-color: var(--bg-surface-elevated); }
+
+        .settings-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-slate);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .settings-form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .settings-form-row label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .settings-form-row input, .settings-form-row select {
+            background-color: var(--bg-base);
+            border: 1px solid var(--border-slate);
+            color: var(--text-light);
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            border-radius: var(--radius-md);
+            outline: none;
+        }
+
+        /* Calendar Widget */
+        .calendar-widget-box {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-slate);
+            border-radius: var(--radius-xl);
+            padding: 1.25rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .calendar-days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.4rem;
+            text-align: center;
+        }
+
+        .day-name {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .calendar-day {
+            font-size: 0.78rem;
+            padding: 0.5rem 0;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-day.current-day {
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 1px dashed var(--accent-blue);
+            color: var(--accent-blue);
+            font-weight: 700;
+        }
+
+        .calendar-day.present-day { background-color: rgba(16, 185, 129, 0.12); color: var(--success-green); }
+        .calendar-day.deadline-day { border: 1px solid var(--warning-amber); color: var(--warning-amber); }
+
+        /* Modal Overlays */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 7, 18, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--transition-smooth);
+        }
+
+        .modal-overlay.show { display: flex; opacity: 1; }
+
+        .modal-box {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-slate);
+            border-radius: var(--radius-xl);
+            width: 460px;
+            max-width: 90vw;
+            box-shadow: var(--shadow-premium);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-slate);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title { font-weight: 800; }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .modal-form {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .toast-notifications-rack {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .portal-toast {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-slate);
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-premium);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition-smooth);
+            min-width: 260px;
+        }
+
+        .portal-toast.show { opacity: 1; transform: translateY(0); }
+        .portal-toast.success { border-left: 4px solid var(--success-green); }
+        .portal-toast.success i { color: var(--success-green); }
+        .portal-toast.warning { border-left: 4px solid var(--warning-amber); }
+        .portal-toast.warning i { color: var(--warning-amber); }
+        .portal-toast.error { border-left: 4px solid var(--danger-red); }
+        .portal-toast.error i { color: var(--danger-red); }
+    </style>
+</head>
+<body>
+
+    <div class="portal-container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand-section">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C11 5 8 9 8 13C8 15.2 9.8 17 12 17C14.2 17 16 15.2 16 13C16 9 13 2 12 2ZM8 14L4 18L8 16V14ZM16 14L20 18L16 16V14Z" />
+                    </svg>
+                </div>
+                <span class="brand-name">InternVerse</span>
+            </div>
+
+            <!-- Profile Info Card -->
+            <div class="profile-mini-card">
+                <div class="avatar-wrapper">
+                    <img src="avatar.png" class="avatar-img" id="sbProfileAvatar" onerror="this.src='avatar.png'">
+                    <span class="online-dot"></span>
+                </div>
+                <div class="profile-details">
+                    <span class="profile-fullname" id="sbProfileName">Loading...</span>
+                    <span class="profile-role-badge">Engineering Intern</span>
+                </div>
+            </div>
+
+            <div class="sidebar-menu-wrapper">
+                <ul class="sidebar-menu">
+                    <li>
+                        <a class="menu-item active" data-view="dashboardView">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Workspace</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menu-item" data-view="tasksView">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>My Tasks</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menu-item" data-view="feedbackView">
+                            <i class="fa-solid fa-comment-dots"></i>
+                            <span>Mentor Reviews</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menu-item" data-view="announcementsView">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <span>Announcements</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menu-item" data-view="profileView">
+                            <i class="fa-solid fa-user-gear"></i>
+                            <span>My Profile</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="menu-item" data-view="settingsView">
+                            <i class="fa-solid fa-sliders"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <a class="menu-item logout-btn" id="sidebarLogoutBtn">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main workspace content -->
+        <main class="main-content">
+            
+            <header class="header-bar">
+                <div class="search-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" class="global-search-input" id="globalSearch" placeholder="Search tasks, deadlines...">
+                </div>
+
+                <div class="header-actions">
+                    <div class="bell-icon-wrapper" id="bellIconTrigger">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="bell-badge" id="bellIconBadge"></span>
+                    </div>
+                    <div class="avatar-header-dropdown" id="profileDropdownTrigger">
+                        <img src="avatar.png" class="header-avatar-img" id="hdrProfileAvatar" onerror="this.src='avatar.png'">
+                    </div>
+                    <div class="dropdown-menu-list" id="hdrDropdownList">
+                        <a class="dropdown-link" data-action="profile"><i class="fa-solid fa-user-gear"></i> Profile</a>
+                        <a class="dropdown-link" data-action="settings"><i class="fa-solid fa-sliders"></i> Settings</a>
+                        <a class="dropdown-link danger-link" id="hdrLogoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
+                    </div>
+                </div>
+            </header>
+
+            <div class="views-root-layout" id="viewsContainer">
+                
+                <!-- 1. DASHBOARD / WORKSPACE PANEL -->
+                <div class="content-view-panel active" id="dashboardView">
+                    <!-- Personalized Greeting Banner -->
+                    <section class="welcome-hero-banner">
+                        <div class="welcome-left">
+                            <span class="welcome-tag">InternVerse Workspace</span>
+                            <h1 class="welcome-h1" id="internGreeting">Welcome back, <span>Intern</span></h1>
+                            <p class="welcome-sub">Submit your milestone deliverables, view evaluation logs, and punch clock attendance logs.</p>
+                        </div>
+                        <div class="clock-widget">
+                            <span class="clock-time" id="liveTime">00:00:00 PM</span>
+                            <span class="clock-date" id="liveDate">Sunday, July 5, 2026</span>
+                        </div>
+                    </section>
+
+                    <!-- Metrics row -->
+                    <section class="metrics-grid-row">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-title">Milestones Done</span>
+                                <div class="metric-icon-box"><i class="fa-solid fa-circle-check"></i></div>
+                            </div>
+                            <div class="metric-number" id="mCompletedTasks">0 / 0</div>
+                            <div class="metric-footer"><span>milestone task deliverables approved</span></div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-title">Attendance Rate</span>
+                                <div class="metric-icon-box"><i class="fa-solid fa-clock"></i></div>
+                            </div>
+                            <div class="metric-number" id="mAttendancePct">100%</div>
+                            <div class="metric-footer"><span>active cohort days logged</span></div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-title">Mentor Grade</span>
+                                <div class="metric-icon-box"><i class="fa-solid fa-star"></i></div>
+                            </div>
+                            <div class="metric-number" id="mGrade">--</div>
+                            <div class="metric-footer"><span>current cohort standing grade</span></div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <span class="metric-title">Cohort Days Left</span>
+                                <div class="metric-icon-box"><i class="fa-solid fa-calendar-day"></i></div>
+                            </div>
+                            <div class="metric-number">24 Days</div>
+                            <div class="metric-footer"><span>of a 60-day internship</span></div>
+                        </div>
+                    </section>
+
+                    <div class="bento-dashboard-grid">
+                        <div class="bento-col">
+                            <div class="dashboard-widget-card">
+                                <span class="widget-title">Milestone Progress Tracker</span>
+                                <div style="display:flex; align-items:center; gap: 2rem;">
+                                    <div style="position:relative; width:80px; height:80px;">
+                                        <svg width="80" height="80" viewBox="0 0 100 100">
+                                            <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.03)" stroke-width="8" fill="none" />
+                                            <circle id="progressCircle" cx="50" cy="50" r="40" stroke="var(--accent-blue)" stroke-width="8" fill="none" stroke-linecap="round" transform="rotate(-90 50 50)" />
+                                            <text x="50" y="56" font-size="16" font-weight="700" fill="var(--text-light)" text-anchor="middle" id="progressPctText">0%</text>
+                                        </svg>
+                                    </div>
+                                    <div style="display:flex; flex-direction:column; gap:4px;">
+                                        <span style="font-weight:700;">On Track to Graduate</span>
+                                        <span style="font-size:0.78rem; color:var(--text-muted); line-height:1.4;">Submit tasks using the dashboard task triggers to update cohort averages.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dashboard-widget-card">
+                                <div class="widget-header">
+                                    <span class="widget-title">Check-in Punch Console</span>
+                                </div>
+                                <div class="attendance-quick-widget" style="padding:0; background:transparent;">
+                                    <div class="attendance-q-status out" id="quickAttendanceStatus">Status: <span>CHECKED OUT</span></div>
+                                    <button class="btn-check-in-out" id="quickAttendanceBtn">
+                                        <i class="fa-solid fa-circle-play"></i> <span>Clock In Now</span>
+                                    </button>
+                                </div>
+                                <div style="margin-top:0.5rem;">
+                                    <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); display:block; margin-bottom:0.5rem;">Today's Attendance Logs</span>
+                                    <div class="clock-logs-list" id="clockLogsList"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bento-col">
+                            <div class="dashboard-widget-card">
+                                <span class="widget-title">Cohort Announcements</span>
+                                <div id="dashboardAnnouncements" style="display:flex; flex-direction:column; gap:0.8rem;"></div>
+                            </div>
+                            <div class="calendar-widget-box" id="workspaceCalendarWidget"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. MY TASKS PANEL -->
+                <div class="content-view-panel" id="tasksView">
+                    <div class="view-section-header">
+                        <div>
+                            <h2 class="view-section-title">My Assigned Tasks</h2>
+                            <span class="view-section-subtitle">Review active tasks and submit milestones for review</span>
+                        </div>
+                    </div>
+                    <div class="table-container-card">
+                        <table class="portal-data-table" id="tasksTable">
+                            <thead>
+                                <tr>
+                                    <th>Task Title</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Feedback / Revision Reason</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tasksTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. MENTOR REVIEWS PANEL -->
+                <div class="content-view-panel" id="feedbackView">
+                    <div class="view-section-header">
+                        <div>
+                            <h2 class="view-section-title">Mentor Evaluation Feedbacks</h2>
+                            <span class="view-section-subtitle">Read comments and audits left by your supervisor</span>
+                        </div>
+                    </div>
+                    <div id="feedbackContainer" style="display:flex; flex-direction:column; gap:1.25rem;"></div>
+                </div>
+
+                <!-- 4. ANNOUNCEMENTS PANEL -->
+                <div class="content-view-panel" id="announcementsView">
+                    <div class="view-section-header">
+                        <div>
+                            <h2 class="view-section-title">Broadcast Bulletins</h2>
+                            <span class="view-section-subtitle">Global cohort notices issued by Sarah</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:1rem;" id="bulletinsContainer"></div>
+                </div>
+
+                <!-- 5. MY PROFILE PANEL -->
+                <div class="content-view-panel" id="profileView">
+                    <div class="view-section-header">
+                        <div>
+                            <h2 class="view-section-title">Personal Profile</h2>
+                            <span class="view-section-subtitle">Manage university enrollment and tag tags</span>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1.2fr 0.8fr; gap:1.5rem; align-items:start;">
+                        <div class="settings-card">
+                            <span style="font-weight:800;">Academic & Personal Details</span>
+                            <form id="profileForm" class="modal-form" style="padding:0;">
+                                <div class="settings-form-row">
+                                    <label>Full Name</label>
+                                    <input type="text" id="profName" required>
+                                </div>
+                                <div class="settings-form-row">
+                                    <label>Email Address</label>
+                                    <input type="email" id="profEmail" disabled style="background-color:rgba(15,23,42,0.4); opacity:0.75; cursor:not-allowed;">
+                                </div>
+                                <div class="settings-form-row">
+                                    <label>College / University</label>
+                                    <input type="text" id="profCollege" value="IIT Bombay">
+                                </div>
+                                <div class="settings-form-row">
+                                    <label>Skills tag-list (comma separated)</label>
+                                    <input type="text" id="profSkills" value="Node.js, Express, React">
+                                </div>
+                                <button type="submit" class="btn-view-primary" style="margin-top:10px;"><i class="fa-solid fa-circle-check"></i> Save Details</button>
+                            </form>
+                        </div>
+                        <div class="settings-card">
+                            <span style="font-weight:800;">Internship Details</span>
+                            <div class="settings-form-row">
+                                <label>Company Name</label>
+                                <input type="text" value="TCS India" disabled style="background-color:rgba(15,23,42,0.4); opacity:0.75; cursor:not-allowed;">
+                            </div>
+                            <div class="settings-form-row">
+                                <label>Assigned Role</label>
+                                <input type="text" value="Backend Engineering Intern" disabled style="background-color:rgba(15,23,42,0.4); opacity:0.75; cursor:not-allowed;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. SETTINGS PANEL -->
+                <div class="content-view-panel" id="settingsView">
+                    <div class="view-section-header">
+                        <div>
+                            <h2 class="view-section-title">Settings</h2>
+                            <span class="view-section-subtitle">Password changes and dashboard themes</span>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start;">
+                        <div class="settings-card">
+                            <span style="font-weight:800;">Change Credentials</span>
+                            <form id="settingsPasswordForm" class="modal-form" style="padding:0;">
+                                <div class="settings-form-row">
+                                    <label>Current Password</label>
+                                    <input type="password" id="setCurrPwd" required>
+                                </div>
+                                <div class="settings-form-row">
+                                    <label>New Password</label>
+                                    <input type="password" id="setNewPwd" required>
+                                </div>
+                                <button type="submit" class="btn-view-primary" style="margin-top:10px;"><i class="fa-solid fa-lock"></i> Update Password</button>
+                            </form>
+                        </div>
+                        <div class="settings-card">
+                            <span style="font-weight:800;">Select Theme Style</span>
+                            <div class="theme-select-row">
+                                <button class="theme-option-btn active" data-theme-val="slate">Slate Dark</button>
+                                <button class="theme-option-btn" data-theme-val="navy">Deep Navy</button>
+                                <button class="theme-option-btn" data-theme-val="charcoal">Charcoal</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Submit Task Deliverable Modal -->
+    <div class="modal-overlay" id="submitTaskModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Submit Deliverable</h3>
+                <button class="modal-close" id="submitTaskCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="submitTaskForm" class="modal-form">
+                <input type="hidden" id="submitTaskId">
+                <div class="settings-form-row">
+                    <label>Task Selected</label>
+                    <input type="text" id="submitTaskTitle" disabled style="background-color:rgba(15,23,42,0.4); opacity:0.75; cursor:not-allowed;">
+                </div>
+                <div class="settings-form-row">
+                    <label>Staging URL / Deliverable link</label>
+                    <input type="url" id="submitTaskText" required placeholder="e.g. https://github.com/myusername/pr-project">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-modal-cancel" id="submitTaskCancelBtn">Cancel</button>
+                    <button type="submit" class="btn-view-primary"><i class="fa-solid fa-paper-plane"></i> Submit Milestone</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast-notifications-rack" id="toastContainerRack"></div>
+
+    <!-- ------------------ DATA ENGINE ------------------ -->
+    <script>
+        const USERS_KEY = 'launchpad_users';
+        const TASKS_KEY = 'launchpad_tasks';
+        const ATTENDANCE_KEY = 'launchpad_attendance';
+        const BROADCASTS_KEY = 'launchpad_broadcasts';
+
+        let tasks = [];
+        let attendance = [];
+        let broadcasts = [];
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        let isCheckedIn = false;
+
+        function fetchDB() {
+            tasks = JSON.parse(localStorage.getItem(TASKS_KEY)) || [];
+            attendance = JSON.parse(localStorage.getItem(ATTENDANCE_KEY)) || [];
+            broadcasts = JSON.parse(localStorage.getItem(BROADCASTS_KEY)) || [];
+        }
+
+        function saveDBState() {
+            localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+            localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(attendance));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchDB();
+
+            // Populate profile
+            document.getElementById('sbProfileName').textContent = currentUser.name;
+            document.getElementById('profName').value = currentUser.name;
+            document.getElementById('profEmail').value = currentUser.email;
+
+            // Load theme
+            const savedTheme = localStorage.getItem('portal_theme') || 'slate';
+            if (savedTheme !== 'slate') {
+                document.body.setAttribute('data-theme', savedTheme);
+            }
+
+            // Real clock datetime updater
+            function updateClock() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                const dateString = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+                document.getElementById('liveTime').textContent = timeString;
+                document.getElementById('liveDate').textContent = dateString;
+
+                const hr = now.getHours();
+                let greet = "Good Evening";
+                if (hr < 12) greet = "Good Morning";
+                else if (hr < 17) greet = "Good Afternoon";
+
+                document.getElementById('internGreeting').innerHTML = `${greet}, <span>${currentUser.name.split(' ')[0]}</span>`;
+            }
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // Toast Alerts
+            function triggerToast(msg, type = 'success') {
+                const rack = document.getElementById('toastContainerRack');
+                const t = document.createElement('div');
+                t.className = `portal-toast ${type}`;
+                let icon = '<i class="fa-solid fa-circle-check"></i>';
+                if (type === 'warning') icon = '<i class="fa-solid fa-circle-exclamation"></i>';
+                if (type === 'error') icon = '<i class="fa-solid fa-circle-xmark"></i>';
+                t.innerHTML = `${icon} <span style="font-size:0.8rem; font-weight:500;">${msg}</span>`;
+                rack.appendChild(t);
+                setTimeout(() => t.classList.add('show'), 50);
+                setTimeout(() => {
+                    t.classList.remove('show');
+                    setTimeout(() => t.remove(), 400);
+                }, 3000);
+            }
+            window.triggerToast = triggerToast;
+
+            // Navigation
+            const menuItems = document.querySelectorAll('.menu-item');
+            const viewPanels = document.querySelectorAll('.content-view-panel');
+
+            function navigateToTab(tabId) {
+                menuItems.forEach(item => {
+                    if (item.getAttribute('data-view') === tabId) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                viewPanels.forEach(panel => {
+                    if (panel.id === tabId) {
+                        panel.classList.add('active');
+                    } else {
+                        panel.classList.remove('active');
+                    }
+                });
+
+                fetchDB();
+                if (tabId === 'dashboardView') renderWorkspaceDashboard();
+                else if (tabId === 'tasksView') renderTasksRoster();
+                else if (tabId === 'feedbackView') renderFeedbackFeed();
+                else if (tabId === 'announcementsView') renderAnnouncementsList();
+                else if (tabId === 'settingsView') renderSettingsConsole();
+            }
+            window.navigateToTab = navigateToTab;
+
+            menuItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const view = item.getAttribute('data-view');
+                    if (view) navigateToTab(view);
+                });
+            });
+
+            // Header Dropdown Toggle
+            const profileDropTrigger = document.getElementById('profileDropdownTrigger');
+            const dropdownList = document.getElementById('hdrDropdownList');
+            profileDropTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownList.classList.toggle('show');
+            });
+            document.addEventListener('click', () => dropdownList.classList.remove('show'));
+
+            dropdownList.querySelectorAll('.dropdown-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    const action = link.getAttribute('data-action');
+                    if (action === 'settings') navigateToTab('settingsView');
+                    else if (action === 'profile') navigateToTab('profileView');
+                });
+            });
+
+            // Punch Clock Status Checking
+            const quickAttendanceBtn = document.getElementById('quickAttendanceBtn');
+            const quickAttendanceStatus = document.getElementById('quickAttendanceStatus');
+
+            function syncClockState() {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const activeLog = attendance.find(a => a.name === currentUser.name && a.date === todayStr && a.outTime === '--');
+                isCheckedIn = !!activeLog;
+
+                if (isCheckedIn) {
+                    quickAttendanceBtn.innerHTML = '<i class="fa-solid fa-circle-stop"></i> <span>Clock Out Now</span>';
+                    quickAttendanceBtn.classList.add('checked-in');
+                    quickAttendanceStatus.innerHTML = 'Status: <span>CHECKED IN</span>';
+                    quickAttendanceStatus.className = 'attendance-q-status in';
+                } else {
+                    quickAttendanceBtn.innerHTML = '<i class="fa-solid fa-circle-play"></i> <span>Clock In Now</span>';
+                    quickAttendanceBtn.classList.remove('checked-in');
+                    quickAttendanceStatus.innerHTML = 'Status: <span>CHECKED OUT</span>';
+                    quickAttendanceStatus.className = 'attendance-q-status out';
+                }
+
+                // Render Logs list
+                const logsWrap = document.getElementById('clockLogsList');
+                logsWrap.innerHTML = '';
+                const myTodayLogs = attendance.filter(a => a.name === currentUser.name && a.date === todayStr);
+                if (myTodayLogs.length === 0) {
+                    logsWrap.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); text-align:center; padding: 0.5rem 0;">No logs clocked today.</div>';
+                } else {
+                    myTodayLogs.forEach(log => {
+                        const div = document.createElement('div');
+                        div.className = 'clock-log-row';
+                        div.innerHTML = `<span>Today Clock Log</span><span style="font-variant-numeric:tabular-nums; font-weight:700;">${log.inTime} - ${log.outTime}</span>`;
+                        logsWrap.appendChild(div);
+                    });
+                }
+            }
+
+            quickAttendanceBtn.addEventListener('click', () => {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const activeLogIndex = attendance.findIndex(a => a.name === currentUser.name && a.date === todayStr && a.outTime === '--');
+
+                if (activeLogIndex === -1) {
+                    attendance.push({
+                        date: todayStr,
+                        name: currentUser.name,
+                        inTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                        outTime: '--',
+                        status: 'Present'
+                    });
+                    triggerToast('Clock-in attendance registered successfully!', 'success');
+                } else {
+                    attendance[activeLogIndex].outTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    triggerToast('Clock-out session completed!', 'warning');
+                }
+                saveDBState();
+                syncClockState();
+                renderWorkspaceDashboard();
+            });
+
+            // Workspace Dashboard Renders
+            function renderWorkspaceDashboard() {
+                // Task counts
+                const myTasks = tasks.filter(t => t.project === currentUser.name);
+                const completedTasks = myTasks.filter(t => t.completed).length;
+                document.getElementById('mCompletedTasks').textContent = `${completedTasks} / ${myTasks.length}`;
+
+                // Calculate progress circle SVG values
+                const pct = myTasks.length > 0 ? Math.round((completedTasks / myTasks.length) * 100) : 0;
+                document.getElementById('progressPctText').textContent = `${pct}%`;
+                const circle = document.getElementById('progressCircle');
+                if (circle) {
+                    const radius = circle.r.baseVal.value;
+                    const circumference = 2 * Math.PI * radius;
+                    const offset = circumference - (pct / 100) * circumference;
+                    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+                    circle.style.strokeDashoffset = offset;
+                }
+
+                // Attendance Rate percentage
+                const myAttendance = attendance.filter(a => a.name === currentUser.name);
+                const presentCount = myAttendance.filter(a => a.status === 'Present').length;
+                const attendancePct = myAttendance.length > 0 ? Math.round((presentCount / myAttendance.length) * 100) : 100;
+                document.getElementById('mAttendancePct').textContent = `${attendancePct}%`;
+
+                // Mentor Grade check
+                const users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+                const mentorUsers = users.filter(u => u.role === 'mentor');
+                // We hardcode Aarav's evaluation score if seeded, or let it load
+                document.getElementById('mGrade').textContent = '8.8 / 10';
+
+                // Clock sync
+                syncClockState();
+
+                // Announcements lists
+                const annoWrap = document.getElementById('dashboardAnnouncements');
+                annoWrap.innerHTML = '';
+                broadcasts.slice(0, 3).forEach(b => {
+                    const div = document.createElement('div');
+                    div.style.fontSize = '0.8rem';
+                    div.style.padding = '0.75rem';
+                    div.style.border = '1px solid var(--border-slate)';
+                    div.style.borderRadius = 'var(--radius-md)';
+                    div.style.backgroundColor = 'rgba(255,255,255,0.005)';
+                    div.innerHTML = `<div>${b.text}</div><div style="font-size:0.68rem; color:var(--text-muted); margin-top:4px;">${b.time}</div>`;
+                    annoWrap.appendChild(div);
+                });
+
+                // Workspace Calendar
+                renderWorkspaceCalendar();
+            }
+
+            function renderWorkspaceCalendar() {
+                const box = document.getElementById('workspaceCalendarWidget');
+                if (!box) return;
+
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth();
+                const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                
+                const firstDay = new Date(year, month, 1).getDay();
+                const totalDays = new Date(year, month + 1, 0).getDate();
+
+                let html = `
+                    <div class="calendar-header">
+                        <span style="font-weight:700; font-size:0.85rem;">${monthNames[month]} ${year}</span>
+                    </div>
+                    <div class="calendar-days-grid">
+                        <span class="day-name">Su</span><span class="day-name">Mo</span><span class="day-name">Tu</span>
+                        <span class="day-name">We</span><span class="day-name">Th</span><span class="day-name">Fr</span><span class="day-name">Sa</span>
+                `;
+
+                for (let i = 0; i < firstDay; i++) {
+                    html += `<span></span>`;
+                }
+
+                for (let day = 1; day <= totalDays; day++) {
+                    let className = "calendar-day";
+                    if (day === now.getDate()) className += " current-day";
+                    
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const clockedIn = attendance.some(a => a.name === currentUser.name && a.date === dateStr);
+                    if (clockedIn) className += " present-day";
+                    if (day === 15) className += " deadline-day"; // Deadline indicator
+
+                    html += `<span class="${className}">${day}</span>`;
+                }
+                html += `</div>`;
+                box.innerHTML = html;
+            }
+
+            // Tasks list and Submission Modal trigger
+            const submitTaskModal = document.getElementById('submitTaskModal');
+            const submitTaskForm = document.getElementById('submitTaskForm');
+            const submitTaskCloseBtn = document.getElementById('submitTaskCloseBtn');
+            const submitTaskCancelBtn = document.getElementById('submitTaskCancelBtn');
+
+            function renderTasksRoster() {
+                const body = document.getElementById('tasksTableBody');
+                body.innerHTML = '';
+
+                const myTasks = tasks.filter(t => t.project === currentUser.name);
+
+                if (myTasks.length === 0) {
+                    body.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:2rem;">No milestones allocated! Keep track of broadcasts.</td></tr>';
+                    return;
+                }
+
+                myTasks.forEach(t => {
+                    const tr = document.createElement('tr');
+                    const badgeClass = t.priority === 'high' ? 'danger' : (t.priority === 'medium' ? 'warning' : 'info');
+                    const statusClass = t.status === 'completed' ? 'active' : (t.status === 'pending-review' ? 'pending' : 'info');
+
+                    let feedbackText = t.feedback || '--';
+                    if (t.status === 'pending-review') feedbackText = 'Awaiting mentor review audit';
+
+                    let actionBtn = `<button class="btn-view-primary" style="padding:6px 12px; font-size:0.75rem;" onclick="promptSubmitTask(${t.id}, '${t.title}')"><i class="fa-solid fa-cloud-arrow-up"></i> Submit</button>`;
+                    if (t.status === 'completed') {
+                        actionBtn = `<span class="status-badge active"><i class="fa-solid fa-circle-check"></i> Passed</span>`;
+                    } else if (t.status === 'pending-review') {
+                        actionBtn = `<span class="status-badge pending">Awaiting Review</span>`;
+                    }
+
+                    tr.innerHTML = `
+                        <td style="font-weight:700;">${t.title}</td>
+                        <td><span class="status-badge ${badgeClass}">${t.priority}</span></td>
+                        <td><span class="status-badge ${statusClass}">${t.status.toUpperCase()}</span></td>
+                        <td style="color:var(--text-muted); font-size:0.78rem;">${feedbackText}</td>
+                        <td>${actionBtn}</td>
+                    `;
+                    body.appendChild(tr);
+                });
+            }
+
+            window.promptSubmitTask = function(id, title) {
+                document.getElementById('submitTaskId').value = id;
+                document.getElementById('submitTaskTitle').value = title;
+                document.getElementById('submitTaskText').value = '';
+                submitTaskModal.classList.add('show');
+            };
+
+            submitTaskCloseBtn.addEventListener('click', () => submitTaskModal.classList.remove('show'));
+            submitTaskCancelBtn.addEventListener('click', () => submitTaskModal.classList.remove('show'));
+
+            submitTaskForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = parseInt(document.getElementById('submitTaskId').value);
+                const deliverableLink = document.getElementById('submitTaskText').value.trim();
+
+                const t = tasks.find(item => item.id === id);
+                if (t) {
+                    t.status = 'pending-review';
+                    t.submissionText = deliverableLink;
+                    t.feedback = '';
+                    saveDBState();
+
+                    triggerToast('Milestone submission dispatched to Mentor review queue!', 'success');
+                    submitTaskModal.classList.remove('show');
+                    renderTasksRoster();
+                }
+            });
+
+            // Feedback panel list
+            function renderFeedbackFeed() {
+                const container = document.getElementById('feedbackContainer');
+                container.innerHTML = '';
+
+                const myTasks = tasks.filter(t => t.project === currentUser.name && (t.feedback || t.status === 'completed'));
+
+                if (myTasks.length === 0) {
+                    container.innerHTML = '<div style="padding:3rem; text-align:center; color:var(--text-muted); border:1px dashed var(--border-slate); border-radius:var(--radius-xl); font-size:0.85rem;">No feedback notes left by mentor yet.</div>';
+                    return;
+                }
+
+                myTasks.forEach(t => {
+                    const div = document.createElement('div');
+                    div.style.backgroundColor = 'var(--bg-surface)';
+                    div.style.border = '1px solid var(--border-slate)';
+                    div.style.borderRadius = 'var(--radius-xl)';
+                    div.style.padding = '1.5rem';
+                    div.style.display = 'flex';
+                    div.style.flexDirection = 'column';
+                    div.style.gap = '0.8rem';
+
+                    let statusText = `<span class="status-badge active">Approved</span>`;
+                    let bodyText = `Milestone deliverable approved successfully: <a href="${t.submissionText}" target="_blank" style="color:var(--accent-blue);">${t.submissionText}</a>`;
+                    if (t.feedback) {
+                        statusText = `<span class="status-badge danger">Revision Requested</span>`;
+                        bodyText = `Revision feedback: "${t.feedback}"`;
+                    }
+
+                    div.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-weight:700; font-size:0.95rem;">${t.title}</span>
+                            ${statusText}
+                        </div>
+                        <div style="font-size:0.82rem; color:var(--text-light); line-height:1.45;">${bodyText}</div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            // Announcement bulletins list
+            function renderAnnouncementsList() {
+                const container = document.getElementById('bulletinsContainer');
+                container.innerHTML = '';
+
+                broadcasts.forEach(b => {
+                    const div = document.createElement('div');
+                    div.style.backgroundColor = 'var(--bg-surface)';
+                    div.style.border = '1px solid var(--border-slate)';
+                    div.style.borderRadius = 'var(--radius-xl)';
+                    div.style.padding = '1.25rem 1.5rem';
+                    div.innerHTML = `
+                        <div style="font-size:0.85rem; line-height:1.5;">${b.text}</div>
+                        <div style="font-size:0.7rem; color:var(--text-muted); margin-top:6px;"><i class="fa-regular fa-clock"></i> ${b.time}</div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            // Profile update form submission
+            const profileForm = document.getElementById('profileForm');
+            profileForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('profName').value.trim();
+                currentUser.name = name;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                document.getElementById('sbProfileName').textContent = name;
+                triggerToast('Academic profile updated successfully!', 'success');
+            });
+
+            // Settings Password updates
+            const settingsPasswordForm = document.getElementById('settingsPasswordForm');
+            settingsPasswordForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const currPwd = document.getElementById('setCurrPwd').value;
+                const newPwd = document.getElementById('setNewPwd').value;
+
+                const users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+                const uRecord = users.find(u => u.email.toLowerCase() === currentUser.email.toLowerCase());
+                if (uRecord && uRecord.password !== currPwd) {
+                    triggerToast('Current password incorrect!', 'error');
+                    return;
+                }
+
+                if (uRecord) {
+                    uRecord.password = newPwd;
+                    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+                }
+                currentUser.password = newPwd;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                triggerToast('Password changed successfully!', 'success');
+                settingsPasswordForm.reset();
+            });
+
+            // Theme options
+            document.querySelectorAll('.theme-option-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const themeVal = btn.getAttribute('data-theme-val');
+                    document.querySelectorAll('.theme-option-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    if (themeVal === 'slate') {
+                        document.body.removeAttribute('data-theme');
+                    } else {
+                        document.body.setAttribute('data-theme', themeVal);
+                    }
+                    localStorage.setItem('portal_theme', themeVal);
+                    triggerToast(`Theme switched to ${btn.textContent}!`, 'success');
+                });
+            });
+
+            function renderSettingsConsole() {
+                const currentTheme = localStorage.getItem('portal_theme') || 'slate';
+                document.querySelectorAll('.theme-option-btn').forEach(btn => {
+                    if (btn.getAttribute('data-theme-val') === currentTheme) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            // Logout redirection
+            document.getElementById('sidebarLogoutBtn').addEventListener('click', () => {
+                triggerToast('Signing out...', 'warning');
+                localStorage.removeItem('currentUser');
+                setTimeout(() => {
+                    window.location.replace('index.html');
+                }, 800);
+            });
+            document.getElementById('hdrLogoutBtn').addEventListener('click', () => {
+                triggerToast('Signing out...', 'warning');
+                localStorage.removeItem('currentUser');
+                setTimeout(() => {
+                    window.location.replace('index.html');
+                }, 800);
+            });
+
+            // Startup dashboard
+            renderWorkspaceDashboard();
+        });
+    </script>
+</body>
+</html>
