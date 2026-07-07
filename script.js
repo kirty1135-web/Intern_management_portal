@@ -62,10 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return getUsers().find(u => u.email.toLowerCase() === email.toLowerCase());
     }
 
-    // Seed default mentor user if database is empty
+    // Seed default mentor and intern users if database is empty
     if (getUsers().length === 0) {
         saveUsers([
-            { name: 'Kirty Goswami', email: 'kirty@internverse.com', password: 'password123', role: 'mentor' }
+            { name: 'Kirty Goswami', email: 'kirty@internverse.com', password: 'password123', role: 'mentor' },
+            { name: 'Aarav Sharma', email: 'aarav@internverse.com', password: 'password123', role: 'intern' }
         ]);
     }
 
