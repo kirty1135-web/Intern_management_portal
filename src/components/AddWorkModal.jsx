@@ -1,10 +1,13 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AppContext } from '../context/AppContext';
 import Modal from './Modal';
+import { X, Paperclip } from 'lucide-react';
 
 const AddWorkModal = ({ isOpen, onClose }) => {
-  const { users, addTask } = useContext(AppContext);
+  const { users, addTask, currentUser } = useContext(AppContext);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
       project: '',
@@ -14,12 +17,36 @@ const AddWorkModal = ({ isOpen, onClose }) => {
       priority: 'Medium',
       status: 'Assigned',
       dueDate: '',
-      attachments: '',
       tags: '',
       estimatedHours: '',
       firstComment: ''
     }
   });
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    const filePromises = files.map((file) => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          resolve({
+            name: file.name,
+            type: file.type || 'document',
+            size: file.size,
+            data: event.target.result
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+    Promise.all(filePromises).then((newFiles) => {
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
+    });
+  };
+
+  const handleRemoveFile = (idxToRemove) => {
+    setUploadedFiles((prev) => prev.filter((_, idx) => idx !== idxToRemove));
+  };
 
   const onSubmit = (data) => {
     const taskComments = data.firstComment.trim() 
@@ -34,20 +61,26 @@ const AddWorkModal = ({ isOpen, onClose }) => {
       priority: data.priority,
       status: data.status,
       dueDate: data.dueDate,
-      attachments: data.attachments.trim(),
+      attachments: uploadedFiles,
       tags: data.tags.trim() || 'Task',
       estimatedHours: data.estimatedHours.trim() || '4',
       comments: taskComments
     };
 
     addTask(taskFields);
+    setUploadedFiles([]);
     reset();
     onClose();
   };
 
-  // Filter interns for selection, or fall back to all users
+  // Filter interns: mentors only see interns assigned to them
   const interns = users.filter(u => u.role === 'intern');
-  const assigneesList = interns.length > 0 ? interns : users;
+  const myInterns = interns.filter(u => u.mentorEmail === currentUser?.email);
+  const assigneesList = currentUser?.role === 'admin' 
+    ? interns 
+    : myInterns.length > 0 
+    ? myInterns 
+    : interns;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Add Work Ticket">
@@ -157,14 +190,19 @@ const AddWorkModal = ({ isOpen, onClose }) => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
-              Attachments (URL/Filename)
+              Upload Files
             </label>
-            <input
-              type="text"
-              {...register('attachments')}
-              placeholder="e.g. spec_sheet.pdf"
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none text-sm transition"
-            />
+            <label className="w-full flex items-center justify-center gap-1.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl hover:border-orange-500 transition text-sm text-slate-500 cursor-pointer">
+              <Paperclip className="w-4 h-4 text-slate-400" />
+              <span>Choose Files</span>
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+                accept=".pdf,.docx,.doc,.pptx,.ppt,.zip,.rar,.tar,.png,.jpg,.jpeg,.gif,.webp,.mp4,.webm,.mov"
+              />
+            </label>
           </div>
 
           <div>
@@ -179,6 +217,20 @@ const AddWorkModal = ({ isOpen, onClose }) => {
             />
           </div>
         </div>
+
+        {/* Selected files preview */}
+        {uploadedFiles.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-100 rounded-xl max-h-24 overflow-y-auto">
+            {uploadedFiles.map((file, idx) => (
+              <span key={idx} className="inline-flex items-center gap-1 px-2.5 py-1 bg-white border border-slate-150 text-[10px] font-bold text-slate-600 rounded-lg shadow-sm">
+                <span className="truncate max-w-[120px]">{file.name}</span>
+                <button type="button" onClick={() => handleRemoveFile(idx)} className="text-slate-400 hover:text-rose-500 transition">
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-4">
           <div>
@@ -210,6 +262,7 @@ const AddWorkModal = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={() => {
+              setUploadedFiles([]);
               reset();
               onClose();
             }}

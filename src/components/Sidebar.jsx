@@ -17,21 +17,33 @@ const Sidebar = ({ isCollapsed, toggleCollapse, isOpen, setIsOpen }) => {
     navigate('/login');
   };
 
-  const menuItems = [
-    { name: 'Dashboard', icon: Home, path: '/dashboard/overview' },
-    { name: 'My Tasks', icon: CheckSquare, path: '/dashboard/tasks' },
-    { name: 'Assigned By Me', icon: Send, path: '/dashboard/assigned' },
-    { name: 'Projects', icon: Folder, path: '/dashboard/projects' },
-    { name: 'Task Board', icon: ClipboardList, path: '/dashboard/kanban' },
-    { name: 'Calendar', icon: Calendar, path: '/dashboard/calendar' },
-    { name: 'Deadlines', icon: Clock, path: '/dashboard/deadlines' },
-    { name: 'Approvals', icon: CheckCircle2, path: '/dashboard/approvals' },
-    { name: 'Meetings', icon: Video, path: '/dashboard/meetings' },
-    { name: 'Activity', icon: BarChart3, path: '/dashboard/activity' },
-    { name: 'My Profile', icon: User, path: '/dashboard/profile' },
-    { name: 'Settings', icon: Settings, path: '/dashboard/settings' },
-    { name: 'Help & Support', icon: HelpCircle, path: '/dashboard/help' },
-  ];
+  const getMenuItems = () => {
+    const isIntern = currentUser?.role === 'intern';
+    const items = [
+      { name: 'Dashboard', icon: Home, path: '/dashboard/overview' },
+      isIntern
+        ? { name: 'My Tasks', icon: CheckSquare, path: '/dashboard/tasks' }
+        : { name: 'Assigned By Me', icon: CheckSquare, path: '/dashboard/tasks' },
+      { name: 'Projects', icon: Folder, path: '/dashboard/projects' },
+      { name: 'Task Board', icon: ClipboardList, path: '/dashboard/kanban' },
+      { name: 'Calendar', icon: Calendar, path: '/dashboard/calendar' },
+      { name: 'Deadlines', icon: Clock, path: '/dashboard/deadlines' },
+    ];
+
+    if (!isIntern) {
+      items.push({ name: 'Approvals', icon: CheckCircle2, path: '/dashboard/approvals' });
+    }
+
+    items.push(
+      { name: 'Meetings', icon: Video, path: '/dashboard/meetings' },
+      { name: 'Activity', icon: BarChart3, path: '/dashboard/activity' },
+      { name: 'Settings', icon: Settings, path: '/dashboard/settings' }
+    );
+
+    return items;
+  };
+
+  const menuItems = getMenuItems();
 
   const unreadCount = notifications.filter(
     n => currentUser && n.targetEmail.toLowerCase() === currentUser.email.toLowerCase() && !n.read

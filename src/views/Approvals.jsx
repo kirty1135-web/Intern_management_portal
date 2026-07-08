@@ -1,22 +1,24 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import { CheckCircle2, AlertCircle, FileCheck, HelpCircle, MessageSquare, CornerDownRight, XCircle } from 'lucide-react';
+import AttachmentSection from '../components/AttachmentSection';
 
 const Approvals = () => {
   const { tasks, users, updateTask, addTaskComment, currentUser, triggerToast } = useContext(AppContext);
   const [selectedTask, setSelectedTask] = useState(null);
   const [feedbackVal, setFeedbackVal] = useState('');
 
-  // Tasks in 'Review' status are pending approvals
-  const pendingApprovals = tasks.filter(t => {
-    if (!currentUser) return false;
-    // Interns only see their submitted review tasks
-    if (currentUser.role === 'intern') {
-      return t.assignTo.toLowerCase() === currentUser.email.toLowerCase() && t.status === 'Review';
-    }
-    // Mentors and Admins see all review requests
-    return t.status === 'Review';
-  });
+  // If the user is an intern, block access to Approvals completely
+  if (currentUser && currentUser.role === 'intern') {
+    return (
+      <div className="p-6 text-center text-slate-500 font-semibold bg-white border border-slate-100 rounded-3xl shadow-sm">
+        Access Denied: Interns do not have access to the review page.
+      </div>
+    );
+  }
+
+  // Tasks in 'Review' status are pending approvals (filtered by role in AppContext)
+  const pendingApprovals = tasks.filter(t => t.status === 'Review');
 
   const getUserName = (email) => {
     const found = users.find(u => u.email.toLowerCase() === email.toLowerCase());
@@ -77,12 +79,12 @@ const Approvals = () => {
                     <h3 className="font-extrabold text-sm text-slate-800">{t.title}</h3>
                   </div>
                   
-                  <span className="px-2 py-0.5 text-[10px] font-bold text-purple-600 bg-purple-50 rounded-full border border-purple-100">
+                  <span className="px-2 py-0.5 text-[10px] font-bold text-purple-650 bg-purple-55 border border-purple-100 rounded-full">
                     Awaiting Review
                   </span>
                 </div>
 
-                <div className="flex justify-between items-center text-xs text-slate-500 flex-wrap gap-2 pt-1">
+                <div className="flex justify-between items-center text-xs text-slate-505 flex-wrap gap-2 pt-1">
                   <span className="font-bold text-slate-600">Submitted by: {getUserName(t.assignTo)}</span>
                   <span>Due date: {t.dueDate}</span>
                 </div>
@@ -101,7 +103,7 @@ const Approvals = () => {
               </div>
               <button
                 onClick={() => setSelectedTask(null)}
-                className="text-xs text-slate-400 hover:text-slate-600 font-bold"
+                className="text-xs text-slate-450 hover:text-slate-600 font-bold"
               >
                 Close
               </button>
@@ -115,19 +117,17 @@ const Approvals = () => {
                 </p>
               </div>
 
-              {selectedTask.attachments && (
-                <div>
-                  <span className="font-bold text-[10px] uppercase text-slate-400 tracking-wider block mb-1">Deliverable Files / Link</span>
-                  <a
-                    href={selectedTask.attachments}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-bold text-orange-600 hover:underline block truncate"
-                  >
-                    {selectedTask.attachments}
-                  </a>
-                </div>
-              )}
+              {/* Attachments Section */}
+              <div className="border-t border-slate-50 pt-3">
+                <AttachmentSection
+                  task={selectedTask}
+                  onUpdate={(fields) => {
+                    updateTask(selectedTask.id, fields);
+                    setSelectedTask(prev => ({ ...prev, ...fields }));
+                  }}
+                  readonly={false}
+                />
+              </div>
 
               {/* Mentor / Admin approval tools */}
               {currentUser && currentUser.role !== 'intern' ? (

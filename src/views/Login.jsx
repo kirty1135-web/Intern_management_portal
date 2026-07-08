@@ -151,7 +151,7 @@ const Login = () => {
                   <Mail className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
                   <input
                     type="email"
-                    placeholder="e.g. kirty@internverse.com"
+                    placeholder="e.g. jane@internverse.com"
                     {...regSignIn('email', { required: 'Email address is required' })}
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-orange-500 text-sm transition"
                   />
@@ -293,7 +293,7 @@ const Login = () => {
                 <input
                   type="email"
                   required
-                  placeholder="e.g. kirty@internverse.com"
+                  placeholder="e.g. jane@internverse.com"
                   value={forgotEmailVal}
                   onChange={(e) => setForgotEmailVal(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-orange-500 text-sm"

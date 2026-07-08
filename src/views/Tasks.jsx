@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import { Search, Calendar, User, Clock, Trash2, MessageSquare, AlertCircle, Plus, Send } from 'lucide-react';
 import AddWorkModal from '../components/AddWorkModal';
+import AttachmentSection from '../components/AttachmentSection';
 
 const Tasks = () => {
   const { tasks, users, deleteTask, addTaskComment, updateTask, currentUser } = useContext(AppContext);
@@ -12,16 +13,8 @@ const Tasks = () => {
   const [newCommentText, setNewCommentText] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
 
-  // Filter tasks based on logged in user role & inputs
-  const myTasks = tasks.filter(t => {
-    if (!currentUser) return false;
-    // Interns only see their assigned tasks
-    if (currentUser.role === 'intern') {
-      return t.assignTo.toLowerCase() === currentUser.email.toLowerCase();
-    }
-    // Mentors and Admins see everything
-    return true;
-  });
+  // Expose tasks directly as they are filtered in AppContext
+  const myTasks = tasks;
 
   const filteredTasks = myTasks.filter(t => {
     const query = searchVal.toLowerCase();
@@ -68,11 +61,15 @@ const Tasks = () => {
     setNewCommentText('');
   };
 
-  const handleStatusChange = (taskId, newStatus) => {
-    updateTask(taskId, { status: newStatus });
+  const handleTaskUpdate = (taskId, fields) => {
+    updateTask(taskId, fields);
     if (selectedTask && selectedTask.id === taskId) {
-      setSelectedTask(prev => ({ ...prev, status: newStatus }));
+      setSelectedTask(prev => ({ ...prev, ...fields }));
     }
+  };
+
+  const handleStatusChange = (taskId, newStatus) => {
+    handleTaskUpdate(taskId, { status: newStatus });
   };
 
   return (
@@ -81,7 +78,9 @@ const Tasks = () => {
       {/* Header Controls */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-xl font-extrabold tracking-tight text-slate-800">Workspace Tasks Checklist</h2>
+          <h2 className="text-xl font-extrabold tracking-tight text-slate-800">
+            {currentUser?.role === 'intern' ? 'My Tasks Checklist' : 'Assigned By Me'}
+          </h2>
           <p className="text-xs text-slate-400 font-medium">Manage deliverables, assignees, and review pipelines</p>
         </div>
         
@@ -166,7 +165,7 @@ const Tasks = () => {
               >
                 <div className="min-w-0 flex-1 space-y-2">
                   <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.project}</span>
+                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.project}</span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 border rounded-full ${getPriorityBadge(t.priority)}`}>
                       {t.priority}
                     </span>
@@ -186,7 +185,7 @@ const Tasks = () => {
                     </span>
                     {t.estimatedHours && (
                       <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-slate-450" /> {t.estimatedHours} Hours
+                        <Clock className="w-3.5 h-3.5 text-slate-455" /> {t.estimatedHours} Hours
                       </span>
                     )}
                   </div>
@@ -203,7 +202,7 @@ const Tasks = () => {
                         deleteTask(t.id);
                         if (selectedTask && selectedTask.id === t.id) setSelectedTask(null);
                       }}
-                      className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition"
+                      className="p-2 text-rose-455 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition"
                       title="Delete Ticket"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -231,7 +230,7 @@ const Tasks = () => {
               </button>
             </div>
 
-            <div className="space-y-4 text-xs text-slate-600">
+            <div className="space-y-4 text-xs text-slate-650">
               <div className="space-y-1">
                 <span className="font-bold text-[10px] uppercase text-slate-400 tracking-wider block">Description</span>
                 <p className="leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100 text-slate-700">
@@ -262,19 +261,14 @@ const Tasks = () => {
                 </div>
               </div>
 
-              {selectedTask.attachments && (
-                <div>
-                  <span className="font-bold text-[10px] uppercase text-slate-400 tracking-wider block mb-1">Deliverable Files</span>
-                  <a
-                    href={selectedTask.attachments}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-bold text-orange-600 hover:underline inline-flex items-center gap-1.5"
-                  >
-                    Open Submission Link / Specs
-                  </a>
-                </div>
-              )}
+              {/* Attachments Section with File Upload support */}
+              <div className="border-t border-slate-100 pt-4">
+                <AttachmentSection
+                  task={selectedTask}
+                  onUpdate={(fields) => handleTaskUpdate(selectedTask.id, fields)}
+                  readonly={false}
+                />
+              </div>
 
               {/* Task Comments Threads */}
               <div className="border-t border-slate-100 pt-4 space-y-3">
@@ -288,11 +282,11 @@ const Tasks = () => {
                   ) : (
                     (selectedTask.comments || []).map((c, i) => (
                       <div key={i} className="space-y-1">
-                        <div className="flex justify-between items-center text-[10px] font-bold text-slate-400">
+                        <div className="flex justify-between items-center text-[10px] font-bold text-slate-450">
                           <span className="text-slate-600">{c.sender}</span>
                           <span>{c.time}</span>
                         </div>
-                        <p className="bg-slate-100/50 p-2.5 rounded-xl border border-slate-100 text-[11px] text-slate-700 leading-normal">
+                        <p className="bg-slate-100/50 p-2.5 rounded-xl border border-slate-100 text-[11px] text-slate-705 leading-normal">
                           {c.text}
                         </p>
                       </div>

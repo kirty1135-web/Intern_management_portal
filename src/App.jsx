@@ -17,7 +17,6 @@ import NotificationsLog from './views/Notifications';
 import Reports from './views/Reports';
 import Profile from './views/Profile';
 import Settings from './views/Settings';
-import HelpSupport from './views/Help';
 
 // Protected Route shell to guard dashboard access
 const ProtectedRoute = ({ children }) => {
@@ -38,10 +37,10 @@ const ToastContainer = () => {
           key={t.id}
           className={`px-4.5 py-3.5 rounded-2xl shadow-lg text-xs font-bold text-white border flex items-center gap-2 transition duration-300 ${
             t.type === 'error'
-              ? 'bg-rose-500 border-rose-600'
+              ? 'bg-rose-50 border-rose-600'
               : t.type === 'warning'
-              ? 'bg-amber-500 border-amber-600'
-              : 'bg-emerald-500 border-emerald-600'
+              ? 'bg-amber-50 border-amber-600'
+              : 'bg-emerald-50 border-emerald-600'
           }`}
         >
           {t.message}
@@ -78,7 +77,6 @@ const AppContent = () => {
           <Route path="reports" element={<Reports />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="help" element={<HelpSupport />} />
           <Route index element={<Navigate to="overview" replace />} />
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />

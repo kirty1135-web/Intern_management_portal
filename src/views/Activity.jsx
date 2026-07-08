@@ -3,7 +3,20 @@ import { AppContext } from '../context/AppContext';
 import { Activity as ActivityIcon, Clock, ChevronRight } from 'lucide-react';
 
 const ActivityLog = () => {
-  const { timeline } = useContext(AppContext);
+  const { timeline, currentUser, users } = useContext(AppContext);
+
+  // Filtered timeline logs (Requirement 15)
+  const filteredTimeline = timeline.filter(log => {
+    if (!currentUser) return false;
+    if (currentUser.role === 'intern') {
+      return log.targetEmail?.toLowerCase() === currentUser.email.toLowerCase();
+    }
+    if (currentUser.role === 'mentor') {
+      const myInternEmails = users.filter(u => u.mentorEmail === currentUser.email).map(u => u.email.toLowerCase());
+      return !log.targetEmail || myInternEmails.includes(log.targetEmail.toLowerCase()) || log.text.includes(currentUser.name);
+    }
+    return true; // Admin sees all
+  });
 
   return (
     <div className="space-y-6 text-slate-800">
@@ -24,8 +37,8 @@ const ActivityLog = () => {
         </div>
 
         <div className="space-y-6 relative before:absolute before:inset-y-0 before:left-3.5 before:w-0.5 before:bg-slate-100 pl-1">
-          {timeline.map((log) => (
-            <div key={log.id} className="relative flex gap-5 items-start text-xs text-slate-600 pl-6">
+          {filteredTimeline.map((log) => (
+            <div key={log.id} className="relative flex gap-5 items-start text-xs text-slate-650 pl-6">
               {/* Dot */}
               <div className="absolute left-1.5 top-1 w-4 h-4 rounded-full bg-white border-2 border-orange-500 flex items-center justify-center z-10">
                 <div className="w-1.5 h-1.5 rounded-full bg-orange-500" />
@@ -41,7 +54,7 @@ const ActivityLog = () => {
             </div>
           ))}
 
-          {timeline.length === 0 && (
+          {filteredTimeline.length === 0 && (
             <div className="text-center py-12 text-slate-400 italic">No workspace logs recorded.</div>
           )}
         </div>

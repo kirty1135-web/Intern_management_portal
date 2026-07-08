@@ -4,11 +4,11 @@ export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   // --- DATABASE KEYS ---
-  const USERS_KEY = 'launchpad_users_v2';
-  const TASKS_KEY = 'launchpad_tasks_v2';
-  const MEETINGS_KEY = 'launchpad_meetings_v2';
-  const NOTIFICATIONS_KEY = 'launchpad_notifications_v2';
-  const TIMELINE_KEY = 'launchpad_timeline_v2';
+  const USERS_KEY = 'launchpad_users_v3';
+  const TASKS_KEY = 'launchpad_tasks_v3';
+  const MEETINGS_KEY = 'launchpad_meetings_v3';
+  const NOTIFICATIONS_KEY = 'launchpad_notifications_v3';
+  const TIMELINE_KEY = 'launchpad_timeline_v3';
 
   const defaultAvatar = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%230891b2"><circle cx="12" cy="8" r="4"/><path d="M12 14c-6.1 0-8 4-8 4v2h16v-2s-1.9-4-8-4z"/></svg>`;
 
@@ -30,8 +30,8 @@ export const AppProvider = ({ children }) => {
     },
     {
       id: "u2",
-      name: 'Kirty Goswami',
-      email: 'kirty@internverse.com',
+      name: 'Jane Watson',
+      email: 'jane@internverse.com',
       password: 'password123',
       role: 'mentor',
       phone: '+91 98765 43210',
@@ -55,7 +55,8 @@ export const AppProvider = ({ children }) => {
       bio: 'Backend developer intern focused on scaling systems.',
       avatar: '',
       grade: '8.8/10',
-      twoFactorEnabled: false
+      twoFactorEnabled: false,
+      mentorEmail: 'jane@internverse.com'
     },
     {
       id: "u4",
@@ -70,7 +71,8 @@ export const AppProvider = ({ children }) => {
       bio: 'Design intern creating engaging interface systems.',
       avatar: '',
       grade: '9.2/10',
-      twoFactorEnabled: false
+      twoFactorEnabled: false,
+      mentorEmail: 'jane@internverse.com'
     },
     {
       id: "u5",
@@ -85,7 +87,8 @@ export const AppProvider = ({ children }) => {
       bio: 'Frontend enthusiast working on user dashboards.',
       avatar: '',
       grade: '8.0/10',
-      twoFactorEnabled: false
+      twoFactorEnabled: false,
+      mentorEmail: 'jane@internverse.com'
     }
   ];
 
@@ -102,8 +105,9 @@ export const AppProvider = ({ children }) => {
       attachments: 'middleware_doc.pdf',
       tags: 'Express, Node.js',
       estimatedHours: '8',
+      assignedBy: 'jane@internverse.com',
       comments: [
-        { sender: 'Kirty Goswami', text: 'Great structure, code matches review rules.', time: '1 day ago' }
+        { sender: 'Jane Watson', text: 'Great structure, code matches review rules.', time: '1 day ago' }
       ]
     },
     {
@@ -118,6 +122,7 @@ export const AppProvider = ({ children }) => {
       attachments: 'figma_link.txt',
       tags: 'Figma, UI-Design',
       estimatedHours: '12',
+      assignedBy: 'jane@internverse.com',
       comments: [
         { sender: 'Priya Patel', text: 'Submitted the figma prototypes, awaiting feedback.', time: '2 hours ago' }
       ]
@@ -134,6 +139,7 @@ export const AppProvider = ({ children }) => {
       attachments: '',
       tags: 'SQL, Performance',
       estimatedHours: '6',
+      assignedBy: 'jane@internverse.com',
       comments: []
     }
   ];
@@ -145,7 +151,7 @@ export const AppProvider = ({ children }) => {
       description: 'Discuss accomplishments, blockers, and demonstrate completed core API features.',
       date: '2026-07-08',
       time: '11:00 AM',
-      host: 'kirty@internverse.com',
+      host: 'jane@internverse.com',
       joinLink: 'https://meet.google.com/xyz-abc-123'
     },
     {
@@ -172,21 +178,21 @@ export const AppProvider = ({ children }) => {
       id: 'n2',
       type: 'Approval Request',
       text: 'Priya Patel submitted Figma User Flow for review.',
-      targetEmail: 'kirty@internverse.com',
+      targetEmail: 'jane@internverse.com',
       time: '4 hours ago',
       read: false
     }
   ];
 
   const defaultTimeline = [
-    { id: 'l1', type: 'Task Created', text: 'Task "Refactor Backend API Middleware" created by Kirty Goswami', time: '2026-07-05 10:15 AM' },
-    { id: 'l2', type: 'Task Assigned', text: 'Task assigned to Aarav Sharma', time: '2026-07-05 10:20 AM' },
-    { id: 'l3', type: 'Status Changed', text: 'Aarav Sharma moved task to "Completed"', time: '2026-07-06 05:30 PM' }
+    { id: 'l1', type: 'Task Created', text: 'Task "Refactor Backend API Middleware" created by Jane Watson', time: '2026-07-05 10:15 AM', targetEmail: 'aarav@internverse.com' },
+    { id: 'l2', type: 'Task Assigned', text: 'Task assigned to Aarav Sharma', time: '2026-07-05 10:20 AM', targetEmail: 'aarav@internverse.com' },
+    { id: 'l3', type: 'Status Changed', text: 'Aarav Sharma moved task to "Completed"', time: '2026-07-06 05:30 PM', targetEmail: 'aarav@internverse.com' }
   ];
 
   // --- STATE DECLARATIONS ---
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('currentUser_v2');
+    const saved = localStorage.getItem('currentUser_v3');
     return saved ? JSON.parse(saved) : null;
   });
 
@@ -195,7 +201,7 @@ export const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : defaultUsers;
   });
 
-  const [tasks, setTasks] = useState(() => {
+  const [allTasks, setAllTasks] = useState(() => {
     const saved = localStorage.getItem(TASKS_KEY);
     return saved ? JSON.parse(saved) : defaultTasks;
   });
@@ -223,8 +229,8 @@ export const AppProvider = ({ children }) => {
   }, [users]);
 
   useEffect(() => {
-    localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-  }, [tasks]);
+    localStorage.setItem(TASKS_KEY, JSON.stringify(allTasks));
+  }, [allTasks]);
 
   useEffect(() => {
     localStorage.setItem(MEETINGS_KEY, JSON.stringify(meetings));
@@ -251,7 +257,7 @@ export const AppProvider = ({ children }) => {
     const found = users.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
     if (found) {
       setCurrentUser(found);
-      localStorage.setItem('currentUser_v2', JSON.stringify(found));
+      localStorage.setItem('currentUser_v3', JSON.stringify(found));
       triggerToast(`Welcome back, ${found.name}!`, 'success');
       return { success: true, user: found };
     }
@@ -260,9 +266,10 @@ export const AppProvider = ({ children }) => {
 
   const logoutUser = () => {
     setCurrentUser(null);
-    localStorage.removeItem('currentUser_v2');
+    localStorage.removeItem('currentUser_v3');
     triggerToast('Logged out successfully.', 'success');
   };
+
 
   const registerUser = (name, email, password, role) => {
     const exists = users.some((u) => u.email.toLowerCase() === email.toLowerCase());
@@ -281,11 +288,15 @@ export const AppProvider = ({ children }) => {
       skills: '',
       bio: '',
       avatar: '',
-      twoFactorEnabled: false
+      twoFactorEnabled: false,
+      mentorEmail: currentUser && currentUser.role !== 'intern' ? currentUser.email : ''
     };
     setUsers((prev) => [...prev, newUser]);
-    setCurrentUser(newUser);
-    localStorage.setItem('currentUser_v2', JSON.stringify(newUser));
+    // Note: Do not automatically log in if registered by a mentor
+    if (!currentUser) {
+      setCurrentUser(newUser);
+      localStorage.setItem('currentUser_v2', JSON.stringify(newUser));
+    }
     triggerToast('Account registered successfully!', 'success');
     return { success: true, user: newUser };
   };
@@ -304,16 +315,17 @@ export const AppProvider = ({ children }) => {
     );
 
     // Sync timeline
-    addTimelineEntry('Profile Updated', `${currentUser.name} updated their profile settings.`);
+    addTimelineEntry('Profile Updated', `${currentUser.name} updated their profile settings.`, currentUser.email);
     triggerToast('Profile updated successfully.', 'success');
   };
 
-  const addTimelineEntry = (type, text) => {
+  const addTimelineEntry = (type, text, targetEmail) => {
     const entry = {
       id: 'l_' + Date.now(),
       type,
       text,
-      time: new Date().toLocaleString()
+      time: new Date().toLocaleString(),
+      targetEmail
     };
     setTimeline((prev) => [entry, ...prev]);
   };
@@ -322,12 +334,13 @@ export const AppProvider = ({ children }) => {
     const newTask = {
       id: 't_' + Date.now(),
       comments: [],
+      assignedBy: currentUser ? currentUser.email : 'system@internverse.com',
       ...taskData
     };
-    setTasks((prev) => [newTask, ...prev]);
+    setAllTasks((prev) => [newTask, ...prev]);
 
     // Log Activity
-    addTimelineEntry('Task Created', `Task "${taskData.title}" created for ${taskData.assignTo}.`);
+    addTimelineEntry('Task Created', `Task "${taskData.title}" created for ${taskData.assignTo}.`, taskData.assignTo);
 
     // Auto notify assignee
     const notifyText = `You have been assigned a new task: "${taskData.title}".`;
@@ -337,7 +350,7 @@ export const AppProvider = ({ children }) => {
   };
 
   const updateTask = (taskId, fields) => {
-    setTasks((prev) =>
+    setAllTasks((prev) =>
       prev.map((t) => {
         if (t.id === taskId) {
           const oldStatus = t.status;
@@ -345,7 +358,8 @@ export const AppProvider = ({ children }) => {
           if (newStatus && oldStatus !== newStatus) {
             addTimelineEntry(
               'Status Changed',
-              `Task "${t.title}" status changed from ${oldStatus} to ${newStatus}.`
+              `Task "${t.title}" status changed from ${oldStatus} to ${newStatus}.`,
+              t.assignTo
             );
             
             // Notify when task changes status
@@ -363,19 +377,21 @@ export const AppProvider = ({ children }) => {
   };
 
   const deleteTask = (taskId) => {
-    const task = tasks.find((t) => t.id === taskId);
+    const task = allTasks.find((t) => t.id === taskId);
     if (task) {
-      setTasks((prev) => prev.filter((t) => t.id !== taskId));
-      addTimelineEntry('Task Deleted', `Task "${task.title}" was deleted.`);
+      setAllTasks((prev) => prev.filter((t) => t.id !== taskId));
+      addTimelineEntry('Task Deleted', `Task "${task.title}" was deleted.`, task.assignTo);
       triggerToast('Task deleted.', 'warning');
     }
   };
 
   const addTaskComment = (taskId, text) => {
     if (!currentUser) return;
-    setTasks((prev) =>
+    let targetEmail = '';
+    setAllTasks((prev) =>
       prev.map((t) => {
         if (t.id === taskId) {
+          targetEmail = t.assignTo;
           const newComment = {
             sender: currentUser.name,
             text,
@@ -386,7 +402,7 @@ export const AppProvider = ({ children }) => {
         return t;
       })
     );
-    addTimelineEntry('Comments', `${currentUser.name} added a comment to a task.`);
+    addTimelineEntry('Comments', `${currentUser.name} added a comment to a task.`, targetEmail);
   };
 
   const addNotification = (type, text, targetEmail) => {
@@ -420,7 +436,7 @@ export const AppProvider = ({ children }) => {
       ...meetingData
     };
     setMeetings((prev) => [...prev, newMeeting]);
-    addTimelineEntry('Meeting Scheduled', `Meeting "${meetingData.title}" scheduled for ${meetingData.date}.`);
+    addTimelineEntry('Meeting Scheduled', `Meeting "${meetingData.title}" scheduled for ${meetingData.date}.`, '');
     
     // Broadcast notifications to all users
     users.forEach((u) => {
@@ -448,13 +464,20 @@ export const AppProvider = ({ children }) => {
     triggerToast('User removed from portal.', 'warning');
   };
 
+  // --- TASK VISIBILITY RESOLUTION ---
+  const visibleTasks = currentUser
+    ? (currentUser.role === 'intern'
+        ? allTasks.filter((t) => t.assignTo.toLowerCase() === currentUser.email.toLowerCase())
+        : allTasks.filter((t) => t.assignedBy?.toLowerCase() === currentUser.email.toLowerCase()))
+    : [];
+
   return (
     <AppContext.Provider
       value={{
         currentUser,
         users,
         defaultAvatar,
-        tasks,
+        tasks: visibleTasks,
         meetings,
         notifications,
         timeline,

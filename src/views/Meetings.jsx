@@ -9,22 +9,24 @@ const Meetings = () => {
   const [meetTime, setMeetTime] = useState('10:00 AM');
   const [meetDate, setMeetDate] = useState('');
   const [meetDesc, setMeetDesc] = useState('');
+  const [meetLink, setMeetLink] = useState('');
 
   const handleCreateMeeting = (e) => {
     e.preventDefault();
-    if (!meetTitle.trim() || !meetDate || !meetTime) return;
+    if (!meetTitle.trim() || !meetDate || !meetTime || !meetLink.trim()) return;
 
     scheduleMeeting({
       title: meetTitle.trim(),
       description: meetDesc.trim(),
       date: meetDate,
       time: meetTime,
-      joinLink: 'https://meet.google.com/meet-sync-' + Math.floor(Math.random() * 1000)
+      joinLink: meetLink.trim()
     });
 
     setMeetTitle('');
     setMeetDesc('');
     setMeetDate('');
+    setMeetLink('');
     setShowForm(false);
   };
 
@@ -84,7 +86,7 @@ const Meetings = () => {
                 </div>
 
                 {meet.description && (
-                  <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed">
+                  <p className="text-xs text-slate-505 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed">
                     {meet.description}
                   </p>
                 )}
@@ -96,7 +98,7 @@ const Meetings = () => {
                     href={meet.joinLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-4 py-1.5 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+                    className="px-4 py-1.5 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-xl text-xs font-bold transition flex items-center gap-1.5 animate-pulse"
                   >
                     <Video className="w-4 h-4" /> Join Google Meet
                   </a>
@@ -148,6 +150,18 @@ const Meetings = () => {
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-orange-500 text-xs transition"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Meeting Link (Google Meet)</label>
+                <input
+                  type="url"
+                  required
+                  placeholder="e.g. https://meet.google.com/xyz-abc-123"
+                  value={meetLink}
+                  onChange={e => setMeetLink(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-orange-500 text-xs transition"
+                />
               </div>
 
               <div>
